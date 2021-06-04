@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Main</title>
-  <style>body { padding: 1em; margin: auto; text-align: center; font-size: 20px }</style>
+  <style>body { padding: 1em; margin: auto; text-align: center; font-size: 150% }</style>
 </head>
 
 <body>
@@ -6268,6 +6268,7 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$pattern = $elm$html$Html$Attributes$stringProperty('pattern');
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -6416,6 +6417,7 @@ var $author$project$Main$view = function (model) {
 										[
 											$elm$html$Html$Events$onInput($author$project$Main$Input),
 											$elm$html$Html$Attributes$autofocus(true),
+											$elm$html$Html$Attributes$pattern('\\d*'),
 											$elm$html$Html$Attributes$value(input)
 										]),
 									_List_Nil)

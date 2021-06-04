@@ -229,7 +229,7 @@ view model =
                             [ Html.text <| "Hoeveel is " ++ String.fromInt n1 ++ " x " ++ String.fromInt n2 ++ "?"
                             ]
                         , Html.p []
-                            [ Html.input [ Html.onInput Input, Html.autofocus True, Html.value input ] []
+                            [ Html.input [ Html.onInput Input, Html.autofocus True, Html.pattern "\\d*", Html.value input ] []
                             ]
                         ]
 
