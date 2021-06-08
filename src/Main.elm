@@ -6,6 +6,8 @@ import Html
 import Html.Attributes as Html
 import Html.Events as Html
 import Json.Decode as Decode
+import LocalStorage
+import LocalStoragePort
 import Set exposing (Set)
 
 
@@ -49,7 +51,7 @@ type Msg
     = Check Int
     | Input String
     | Next
-    | Noop
+    | LocalStorageOp LocalStorage.Response
 
 
 keyDecoder : Decode.Decoder Msg
@@ -88,9 +90,15 @@ init flags =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    onKeyDown keyDecoder
+    Sub.batch
+        [ onKeyDown keyDecoder
+        , LocalStoragePort.make "compurob.nl/tafels:"
+            |> LocalStorage.responseHandler LocalStorageOp
+            |> LocalStoragePort.response
+        ]
 
 
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         nextModel =
@@ -158,8 +166,19 @@ update msg model =
                         _ ->
                             model
 
-                Noop ->
-                    model
+                LocalStorageOp res ->
+                    case res of
+                        LocalStorage.Item key value ->
+                            model
+
+                        LocalStorage.ItemNotFound key ->
+                            model
+
+                        LocalStorage.KeyList keys ->
+                            model
+
+                        LocalStorage.Error errMsg ->
+                            model
     in
     ( nextModel, Cmd.none )
 
