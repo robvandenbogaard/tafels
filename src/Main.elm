@@ -6,7 +6,7 @@ import Html
 import Html.Attributes as Html
 import Html.Events as Html
 import Json.Decode as Decode
-import LocalStorage
+import LocalStorage exposing (LocalStorage)
 import LocalStoragePort
 import Set exposing (Set)
 
@@ -24,13 +24,20 @@ main =
 type alias Model =
     { tafels : Set Int
     , exercises : List Exercise
+    , achievements : Achievements
     , report : Report
     , state : State
+    , storage : LocalStorage Msg
     }
 
 
 type alias Exercise =
     ( Int, Int )
+
+
+type alias Achievements =
+    { tafels : Set Int
+    }
 
 
 type alias Report =
@@ -40,7 +47,8 @@ type alias Report =
 
 
 type State
-    = Start
+    = Load
+    | Start
     | Prompt Exercise String
     | CheckedSuccess Exercise
     | CheckedFail Exercise
@@ -79,12 +87,18 @@ keyMsg string =
 
 
 init flags =
+    let
+        storage =
+            LocalStoragePort.make "compurob.nl/tafels:"
+    in
     ( { tafels = Set.empty
       , exercises = []
+      , achievements = Achievements Set.empty
       , report = Report [] []
-      , state = Start
+      , state = Load
+      , storage = storage
       }
-    , Cmd.none
+    , LocalStorage.getItem storage "achievements"
     )
 
 
@@ -92,7 +106,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ onKeyDown keyDecoder
-        , LocalStoragePort.make "compurob.nl/tafels:"
+        , model.storage
             |> LocalStorage.responseHandler LocalStorageOp
             |> LocalStoragePort.response
         ]
@@ -115,6 +129,9 @@ update msg model =
 
                 Next ->
                     case model.state of
+                        Load ->
+                            model
+
                         Start ->
                             if not (Set.isEmpty model.tafels) then
                                 advance
@@ -169,16 +186,16 @@ update msg model =
                 LocalStorageOp res ->
                     case res of
                         LocalStorage.Item key value ->
-                            model
+                            { model | state = Start }
 
                         LocalStorage.ItemNotFound key ->
-                            model
+                            { model | state = Start }
 
                         LocalStorage.KeyList keys ->
-                            model
+                            { model | state = Start }
 
                         LocalStorage.Error errMsg ->
-                            model
+                            { model | state = Start }
     in
     ( nextModel, Cmd.none )
 
@@ -205,6 +222,9 @@ view model =
     let
         html =
             case model.state of
+                Load ->
+                    Html.p [] [ Html.text "Momentje.." ]
+
                 Start ->
                     Html.div []
                         [ Html.p []
@@ -219,7 +239,11 @@ view model =
                                                 [ Html.input
                                                     [ Html.type_ "checkbox"
                                                     , Html.onClick <| Check tafel
-                                                    , Html.checked <| Set.member tafel model.tafels
+                                                    , Html.checked <|
+                                                        Set.member tafel model.tafels
+                                                            || Set.member tafel model.achievements.tafels
+                                                    , Html.readonly <|
+                                                        Set.member tafel model.achievements.tafels
                                                     ]
                                                     []
                                                 ]
