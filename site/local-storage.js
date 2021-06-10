@@ -8,7 +8,6 @@ ElmLocalStoragePorts.prototype.subscribe =
     if (!clearPortName) clearPortName = "clear";
     if (!listKeysPortName) listKeysPortName = "listKeys";
     if (!responsePortName) responsePortName = "response";
-
     if (app.ports[responsePortName]) {
 
       var responsePort = app.ports[responsePortName];
@@ -17,7 +16,7 @@ ElmLocalStoragePorts.prototype.subscribe =
         app.ports[getPortName].subscribe(function(key) {
           var val = null;
           try {
-            val = JSON.parse(localStorage.getItem(key))
+            val = JSON.parse(window.localStorage.getItem(key))
           } catch (e) {}
           responsePort.send({
             key: key,
@@ -33,9 +32,9 @@ ElmLocalStoragePorts.prototype.subscribe =
           var key = kv[0];
           var json = kv[1];
           if (json === null) {
-            localStorage.removeItem(key);
+            window.localStorage.removeItem(key);
           } else {
-            localStorage.setItem(key, JSON.stringify(json));
+            window.localStorage.setItem(key, JSON.stringify(json));
           }
         });
       } else {
@@ -45,15 +44,15 @@ ElmLocalStoragePorts.prototype.subscribe =
       if (app.ports[clearPortName]) {
         app.ports[clearPortName].subscribe(function(prefix) {
           if (prefix) {
-            var cnt = localStorage.length;
+            var cnt = window.localStorage.length;
             for (var i = cnt - 1; i >= 0; --i) {
-              var key = localStorage.key(i);
+              var key = window.localStorage.key(i);
               if (key && key.startsWith(prefix)) {
-                localStorage.removeItem(key);
+                window.localStorage.removeItem(key);
               }
             }
           } else {
-            localStorage.clear();
+            window.localStorage.clear();
           }
         });
       } else {
@@ -62,10 +61,10 @@ ElmLocalStoragePorts.prototype.subscribe =
 
       if (app.ports[listKeysPortName]) {
         app.ports[listKeysPortName].subscribe(function(prefix) {
-          var cnt = localStorage.length;
+          var cnt = window.localStorage.length;
           var keys = [];
           for (var i = 0; i < cnt; i++) {
-            var key = localStorage.key(i);
+            var key = window.localStorage.key(i);
             if (key && key.startsWith(prefix)) {
               keys.push(key);
             }
@@ -79,5 +78,3 @@ ElmLocalStoragePorts.prototype.subscribe =
       console.warn("The " + responsePortName + " port is not connected.");
     }
   };
-
-module.exports.ElmLocalStoragePorts = ElmLocalStoragePorts;

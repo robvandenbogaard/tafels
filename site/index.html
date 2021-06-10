@@ -5,12 +5,16 @@
   <title>Tafels</title>
   <style>body { padding: 1em; margin: auto; text-align: center; font-size: 150% }</style>
   <script src="app.js"></script>
-  <script src="index.js"></script>
+  <script src="local-storage.js"></script>
 </head>
-
 <body>
+    <pre id="main"></pre>
+    <script>
+        const app = Elm.Main.init({node: document.getElementById('main')});
 
-<pre id="main"></pre>
-
+        // Subscribe to local storage.
+        const localStorage = new ElmLocalStoragePorts();
+        localStorage.subscribe(app);
+    </script>
 </body>
 </html>

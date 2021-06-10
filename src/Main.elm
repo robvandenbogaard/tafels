@@ -6,6 +6,7 @@ import Html
 import Html.Attributes as Html
 import Html.Events as Html
 import Json.Decode as Decode
+import Json.Encode as Encode
 import LocalStorage exposing (LocalStorage)
 import LocalStoragePort
 import Set exposing (Set)
@@ -57,6 +58,7 @@ type State
 
 type Msg
     = Check Int
+    | NoCheck Int
     | Input String
     | Next
     | LocalStorageOp LocalStorage.Response
@@ -114,108 +116,132 @@ subscriptions model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        nextModel =
-            case msg of
-                Check tafel ->
-                    { model
-                        | tafels =
-                            if Set.member tafel model.tafels then
-                                Set.remove tafel model.tafels
+    case msg of
+        Check tafel ->
+            ( { model
+                | tafels =
+                    if Set.member tafel model.tafels then
+                        Set.remove tafel model.tafels
 
-                            else
-                                Set.insert tafel model.tafels
-                    }
+                    else
+                        Set.insert tafel model.tafels
+              }
+            , Cmd.none
+            )
 
-                Next ->
-                    case model.state of
-                        Load ->
-                            model
+        NoCheck tafel ->
+            let
+                _ =
+                    Debug.log "NoCheck" <| String.fromInt tafel
+            in
+            ( model, Cmd.none )
 
-                        Start ->
-                            if not (Set.isEmpty model.tafels) then
-                                advance
+        Next ->
+            case model.state of
+                Load ->
+                    ( model, Cmd.none )
+
+                Start ->
+                    if not (Set.isEmpty model.tafels) then
+                        advance
+                            { model
+                                | exercises = exercisesFromTafels (List.range 0 12) (Set.toList model.tafels)
+                            }
+
+                    else
+                        ( model, Cmd.none )
+
+                Prompt ( n1, n2 ) input ->
+                    case String.toInt input of
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                        Just n ->
+                            if n1 * n2 == n then
+                                advance <|
                                     { model
-                                        | exercises = exercisesFromTafels (List.range 0 12) (Set.toList model.tafels)
+                                        | report =
+                                            { successes = ( n1, n2 ) :: model.report.successes
+                                            , fails = model.report.fails
+                                            }
                                     }
 
                             else
-                                model
-
-                        Prompt ( n1, n2 ) input ->
-                            case String.toInt input of
-                                Nothing ->
-                                    model
-
-                                Just n ->
-                                    if n1 * n2 == n then
-                                        advance <|
-                                            { model
-                                                | report =
-                                                    { successes = ( n1, n2 ) :: model.report.successes
-                                                    , fails = model.report.fails
-                                                    }
+                                advance <|
+                                    { model
+                                        | report =
+                                            { successes = model.report.successes
+                                            , fails = ( n1, n2 ) :: model.report.fails
                                             }
+                                    }
 
-                                    else
-                                        advance <|
-                                            { model
-                                                | report =
-                                                    { successes = model.report.successes
-                                                    , fails = ( n1, n2 ) :: model.report.fails
-                                                    }
-                                            }
+                CheckedSuccess _ ->
+                    advance model
 
-                        CheckedSuccess _ ->
-                            advance model
+                CheckedFail _ ->
+                    advance model
 
-                        CheckedFail _ ->
-                            advance model
+                Finish ->
+                    ( { model | tafels = Set.empty, state = Start }, Cmd.none )
 
-                        Finish ->
-                            model
+        Input input ->
+            case model.state of
+                Prompt p _ ->
+                    ( { model | state = Prompt p input }, Cmd.none )
 
-                Input input ->
-                    case model.state of
-                        Prompt p _ ->
-                            { model | state = Prompt p input }
+                _ ->
+                    ( model, Cmd.none )
 
-                        _ ->
-                            model
+        LocalStorageOp res ->
+            case res of
+                LocalStorage.Item key value ->
+                    let
+                        achievements =
+                            Decode.list Decode.int
+                                |> Decode.field "tafels"
+                                |> Decode.andThen (Decode.succeed << Achievements << Set.fromList)
+                                |> (\a -> Decode.decodeValue a value)
+                                |> Result.withDefault model.achievements
+                    in
+                    ( { model | state = Start, achievements = achievements }, Cmd.none )
 
-                LocalStorageOp res ->
-                    case res of
-                        LocalStorage.Item key value ->
-                            { model | state = Start }
+                LocalStorage.ItemNotFound key ->
+                    ( { model | state = Start }, Cmd.none )
 
-                        LocalStorage.ItemNotFound key ->
-                            { model | state = Start }
+                LocalStorage.KeyList keys ->
+                    ( { model | state = Start }, Cmd.none )
 
-                        LocalStorage.KeyList keys ->
-                            { model | state = Start }
-
-                        LocalStorage.Error errMsg ->
-                            { model | state = Start }
-    in
-    ( nextModel, Cmd.none )
+                LocalStorage.Error errMsg ->
+                    ( { model | state = Start }, Cmd.none )
 
 
+advance : Model -> ( Model, Cmd Msg )
 advance model =
     case model.exercises of
         nextExercise :: exercises ->
-            { model | exercises = exercises, state = Prompt nextExercise "" }
+            ( { model | exercises = exercises, state = Prompt nextExercise "" }, Cmd.none )
 
         [] ->
             case List.reverse model.report.fails of
                 [] ->
-                    { model | state = Finish }
+                    let
+                        achievements =
+                            Set.union model.tafels model.achievements.tafels
+                    in
+                    ( { model | state = Finish, achievements = { tafels = achievements } }
+                    , [ ( "tafels", Encode.set Encode.int achievements ) ]
+                        |> Encode.object
+                        |> LocalStorage.setItem model.storage "achievements"
+                    )
 
                 fail :: fails ->
-                    { model
+                    ( { model
                         | exercises = fails
                         , state = Prompt fail ""
                         , report = Report model.report.successes []
-                    }
+                      }
+                    , Cmd.none
+                    )
 
 
 view model =
@@ -238,11 +264,16 @@ view model =
                                             [ Html.td []
                                                 [ Html.input
                                                     [ Html.type_ "checkbox"
-                                                    , Html.onClick <| Check tafel
+                                                    , Html.onClick <|
+                                                        if Set.member tafel model.achievements.tafels then
+                                                            NoCheck tafel
+
+                                                        else
+                                                            Check tafel
                                                     , Html.checked <|
                                                         Set.member tafel model.tafels
                                                             || Set.member tafel model.achievements.tafels
-                                                    , Html.readonly <|
+                                                    , Html.disabled <|
                                                         Set.member tafel model.achievements.tafels
                                                     ]
                                                     []

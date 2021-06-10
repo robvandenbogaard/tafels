@@ -5144,59 +5144,32 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
+var $author$project$Main$Achievements = function (tafels) {
+	return {tafels: tafels};
+};
+var $author$project$Main$Load = {$: 'Load'};
 var $author$project$Main$Report = F2(
 	function (successes, fails) {
 		return {fails: fails, successes: successes};
 	});
-var $author$project$Main$Start = {$: 'Start'};
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$init = function (flags) {
-	return _Utils_Tuple2(
-		{
-			exercises: _List_Nil,
-			report: A2($author$project$Main$Report, _List_Nil, _List_Nil),
-			state: $author$project$Main$Start,
-			tafels: $elm$core$Set$empty
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Main$LocalStorageOp = function (a) {
-	return {$: 'LocalStorageOp', a: a};
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $author$project$Main$Next = {$: 'Next'};
-var $author$project$Main$keyMsg = function (string) {
-	if (string === 'Enter') {
-		return $elm$core$Maybe$Just($author$project$Main$Next);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$keyDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (msg) {
-		if (msg.$ === 'Nothing') {
-			return $elm$json$Json$Decode$fail('key passed on');
-		} else {
-			var m = msg.a;
-			return $elm$json$Json$Decode$succeed(m);
-		}
-	},
-	A2(
-		$elm$json$Json$Decode$map,
-		$author$project$Main$keyMsg,
-		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
+var $the_sett$elm_localstorage$LocalStorage$addPrefix = F2(
+	function (prefix, key) {
+		return (prefix === '') ? key : (prefix + ('.' + key));
+	});
+var $the_sett$elm_localstorage$LocalStorage$getItem = F2(
+	function (_v0, key) {
+		var _v1 = _v0.a;
+		var ports = _v1.a;
+		var prefix = _v1.b;
+		return ports.getItem(
+			A2($the_sett$elm_localstorage$LocalStorage$addPrefix, prefix, key));
+	});
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$LocalStoragePort$clear = _Platform_outgoingPort('clear', $elm$json$Json$Encode$string);
 var $author$project$LocalStoragePort$getItem = _Platform_outgoingPort('getItem', $elm$json$Json$Encode$string);
@@ -5234,6 +5207,49 @@ var $author$project$LocalStoragePort$setItem = _Platform_outgoingPort(
 				]));
 	});
 var $author$project$LocalStoragePort$make = A4($the_sett$elm_localstorage$LocalStorage$make, $author$project$LocalStoragePort$getItem, $author$project$LocalStoragePort$setItem, $author$project$LocalStoragePort$clear, $author$project$LocalStoragePort$listKeys);
+var $author$project$Main$init = function (flags) {
+	var storage = $author$project$LocalStoragePort$make('compurob.nl/tafels:');
+	return _Utils_Tuple2(
+		{
+			achievements: $author$project$Main$Achievements($elm$core$Set$empty),
+			exercises: _List_Nil,
+			report: A2($author$project$Main$Report, _List_Nil, _List_Nil),
+			state: $author$project$Main$Load,
+			storage: storage,
+			tafels: $elm$core$Set$empty
+		},
+		A2($the_sett$elm_localstorage$LocalStorage$getItem, storage, 'achievements'));
+};
+var $author$project$Main$LocalStorageOp = function (a) {
+	return {$: 'LocalStorageOp', a: a};
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $author$project$Main$Next = {$: 'Next'};
+var $author$project$Main$keyMsg = function (string) {
+	if (string === 'Enter') {
+		return $elm$core$Maybe$Just($author$project$Main$Next);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$keyDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (msg) {
+		if (msg.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('key passed on');
+		} else {
+			var m = msg.a;
+			return $elm$json$Json$Decode$succeed(m);
+		}
+	},
+	A2(
+		$elm$json$Json$Decode$map,
+		$author$project$Main$keyMsg,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
 var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
@@ -5720,44 +5736,116 @@ var $author$project$Main$subscriptions = function (model) {
 			[
 				$elm$browser$Browser$Events$onKeyDown($author$project$Main$keyDecoder),
 				$author$project$LocalStoragePort$response(
-				A2(
-					$the_sett$elm_localstorage$LocalStorage$responseHandler,
-					$author$project$Main$LocalStorageOp,
-					$author$project$LocalStoragePort$make('compurob.nl.tafels')))
+				A2($the_sett$elm_localstorage$LocalStorage$responseHandler, $author$project$Main$LocalStorageOp, model.storage))
 			]));
 };
 var $author$project$Main$Prompt = F2(
 	function (a, b) {
 		return {$: 'Prompt', a: a, b: b};
 	});
+var $author$project$Main$Start = {$: 'Start'};
 var $author$project$Main$Finish = {$: 'Finish'};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$core$Set$foldl = F3(
+	function (func, initialState, _v0) {
+		var dict = _v0.a;
+		return A3(
+			$elm$core$Dict$foldl,
+			F3(
+				function (key, _v1, state) {
+					return A2(func, key, state);
+				}),
+			initialState,
+			dict);
+	});
+var $elm$json$Json$Encode$set = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$Set$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $the_sett$elm_localstorage$LocalStorage$setItem = F3(
+	function (_v0, key, value) {
+		var _v1 = _v0.a;
+		var ports = _v1.a;
+		var prefix = _v1.b;
+		return ports.setItem(
+			_Utils_Tuple2(
+				A2($the_sett$elm_localstorage$LocalStorage$addPrefix, prefix, key),
+				value));
+	});
+var $elm$core$Set$union = F2(
+	function (_v0, _v1) {
+		var dict1 = _v0.a;
+		var dict2 = _v1.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A2($elm$core$Dict$union, dict1, dict2));
+	});
 var $author$project$Main$advance = function (model) {
 	var _v0 = model.exercises;
 	if (_v0.b) {
 		var nextExercise = _v0.a;
 		var exercises = _v0.b;
-		return _Utils_update(
-			model,
-			{
-				exercises: exercises,
-				state: A2($author$project$Main$Prompt, nextExercise, '')
-			});
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					exercises: exercises,
+					state: A2($author$project$Main$Prompt, nextExercise, '')
+				}),
+			$elm$core$Platform$Cmd$none);
 	} else {
 		var _v1 = $elm$core$List$reverse(model.report.fails);
 		if (!_v1.b) {
-			return _Utils_update(
-				model,
-				{state: $author$project$Main$Finish});
+			var achievements = A2($elm$core$Set$union, model.tafels, model.achievements.tafels);
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						achievements: {tafels: achievements},
+						state: $author$project$Main$Finish
+					}),
+				A3(
+					$the_sett$elm_localstorage$LocalStorage$setItem,
+					model.storage,
+					'achievements',
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'tafels',
+								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, achievements))
+							]))));
 		} else {
 			var fail = _v1.a;
 			var fails = _v1.b;
-			return _Utils_update(
-				model,
-				{
-					exercises: fails,
-					report: A2($author$project$Main$Report, model.report.successes, _List_Nil),
-					state: A2($author$project$Main$Prompt, fail, '')
-				});
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						exercises: fails,
+						report: A2($author$project$Main$Report, model.report.successes, _List_Nil),
+						state: A2($author$project$Main$Prompt, fail, '')
+					}),
+				$elm$core$Platform$Cmd$none);
 		}
 	}
 };
@@ -5799,6 +5887,10 @@ var $elm$core$Set$insert = F2(
 		return $elm$core$Set$Set_elm_builtin(
 			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
 	});
+var $elm$core$Set$fromList = function (list) {
+	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$core$Dict$isEmpty = function (dict) {
 	if (dict.$ === 'RBEmpty_elm_builtin') {
 		return true;
@@ -5810,6 +5902,7 @@ var $elm$core$Set$isEmpty = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$isEmpty(dict);
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -6224,110 +6317,168 @@ var $elm$core$Set$remove = F2(
 		return $elm$core$Set$Set_elm_builtin(
 			A2($elm$core$Dict$remove, key, dict));
 	});
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var nextModel = function () {
-			switch (msg.$) {
-				case 'Check':
-					var tafel = msg.a;
-					return _Utils_update(
+		switch (msg.$) {
+			case 'Check':
+				var tafel = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
 						model,
 						{
 							tafels: A2($elm$core$Set$member, tafel, model.tafels) ? A2($elm$core$Set$remove, tafel, model.tafels) : A2($elm$core$Set$insert, tafel, model.tafels)
-						});
-				case 'Next':
-					var _v1 = model.state;
-					switch (_v1.$) {
-						case 'Start':
-							return (!$elm$core$Set$isEmpty(model.tafels)) ? $author$project$Main$advance(
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'NoCheck':
+				var tafel = msg.a;
+				var _v1 = A2(
+					$elm$core$Debug$log,
+					'NoCheck',
+					$elm$core$String$fromInt(tafel));
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'Next':
+				var _v2 = model.state;
+				switch (_v2.$) {
+					case 'Load':
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Start':
+						return (!$elm$core$Set$isEmpty(model.tafels)) ? $author$project$Main$advance(
+							_Utils_update(
+								model,
+								{
+									exercises: A2(
+										$author$project$Main$exercisesFromTafels,
+										A2($elm$core$List$range, 0, 12),
+										$elm$core$Set$toList(model.tafels))
+								})) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Prompt':
+						var _v3 = _v2.a;
+						var n1 = _v3.a;
+						var n2 = _v3.b;
+						var input = _v2.b;
+						var _v4 = $elm$core$String$toInt(input);
+						if (_v4.$ === 'Nothing') {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						} else {
+							var n = _v4.a;
+							return _Utils_eq(n1 * n2, n) ? $author$project$Main$advance(
 								_Utils_update(
 									model,
 									{
-										exercises: A2(
-											$author$project$Main$exercisesFromTafels,
-											A2($elm$core$List$range, 0, 12),
-											$elm$core$Set$toList(model.tafels))
-									})) : model;
-						case 'Prompt':
-							var _v2 = _v1.a;
-							var n1 = _v2.a;
-							var n2 = _v2.b;
-							var input = _v1.b;
-							var _v3 = $elm$core$String$toInt(input);
-							if (_v3.$ === 'Nothing') {
-								return model;
-							} else {
-								var n = _v3.a;
-								return _Utils_eq(n1 * n2, n) ? $author$project$Main$advance(
-									_Utils_update(
-										model,
-										{
-											report: {
-												fails: model.report.fails,
-												successes: A2(
-													$elm$core$List$cons,
-													_Utils_Tuple2(n1, n2),
-													model.report.successes)
-											}
-										})) : $author$project$Main$advance(
-									_Utils_update(
-										model,
-										{
-											report: {
-												fails: A2(
-													$elm$core$List$cons,
-													_Utils_Tuple2(n1, n2),
-													model.report.fails),
-												successes: model.report.successes
-											}
-										}));
-							}
-						case 'CheckedSuccess':
-							return $author$project$Main$advance(model);
-						case 'CheckedFail':
-							return $author$project$Main$advance(model);
-						default:
-							return model;
-					}
-				case 'Input':
-					var input = msg.a;
-					var _v4 = model.state;
-					if (_v4.$ === 'Prompt') {
-						var p = _v4.a;
-						return _Utils_update(
+										report: {
+											fails: model.report.fails,
+											successes: A2(
+												$elm$core$List$cons,
+												_Utils_Tuple2(n1, n2),
+												model.report.successes)
+										}
+									})) : $author$project$Main$advance(
+								_Utils_update(
+									model,
+									{
+										report: {
+											fails: A2(
+												$elm$core$List$cons,
+												_Utils_Tuple2(n1, n2),
+												model.report.fails),
+											successes: model.report.successes
+										}
+									}));
+						}
+					case 'CheckedSuccess':
+						return $author$project$Main$advance(model);
+					case 'CheckedFail':
+						return $author$project$Main$advance(model);
+					default:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Start, tafels: $elm$core$Set$empty}),
+							$elm$core$Platform$Cmd$none);
+				}
+			case 'Input':
+				var input = msg.a;
+				var _v5 = model.state;
+				if (_v5.$ === 'Prompt') {
+					var p = _v5.a;
+					return _Utils_Tuple2(
+						_Utils_update(
 							model,
 							{
 								state: A2($author$project$Main$Prompt, p, input)
-							});
-					} else {
-						return model;
-					}
-				default:
-					var res = msg.a;
-					switch (res.$) {
-						case 'Item':
-							var key = res.a;
-							var value = res.b;
-							return model;
-						case 'ItemNotFound':
-							var key = res.a;
-							return model;
-						case 'KeyList':
-							var keys = res.a;
-							return model;
-						default:
-							var errMsg = res.a;
-							return model;
-					}
-			}
-		}();
-		return _Utils_Tuple2(nextModel, $elm$core$Platform$Cmd$none);
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var res = msg.a;
+				switch (res.$) {
+					case 'Item':
+						var key = res.a;
+						var value = res.b;
+						var achievements = A2(
+							$elm$core$Result$withDefault,
+							model.achievements,
+							function (a) {
+								return A2($elm$json$Json$Decode$decodeValue, a, value);
+							}(
+								A2(
+									$elm$json$Json$Decode$andThen,
+									A2(
+										$elm$core$Basics$composeL,
+										A2($elm$core$Basics$composeL, $elm$json$Json$Decode$succeed, $author$project$Main$Achievements),
+										$elm$core$Set$fromList),
+									A2(
+										$elm$json$Json$Decode$field,
+										'tafels',
+										$elm$json$Json$Decode$list($elm$json$Json$Decode$int)))));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{achievements: achievements, state: $author$project$Main$Start}),
+							$elm$core$Platform$Cmd$none);
+					case 'ItemNotFound':
+						var key = res.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Start}),
+							$elm$core$Platform$Cmd$none);
+					case 'KeyList':
+						var keys = res.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Start}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var errMsg = res.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Start}),
+							$elm$core$Platform$Cmd$none);
+				}
+		}
 	});
 var $author$project$Main$Check = function (a) {
 	return {$: 'Check', a: a};
 };
 var $author$project$Main$Input = function (a) {
 	return {$: 'Input', a: a};
+};
+var $author$project$Main$NoCheck = function (a) {
+	return {$: 'NoCheck', a: a};
 };
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -6340,6 +6491,7 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 var $elm$html$Html$Attributes$autofocus = $elm$html$Html$Attributes$boolProperty('autofocus');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$input = _VirtualDom_node('input');
@@ -6417,6 +6569,14 @@ var $author$project$Main$view = function (model) {
 	var html = function () {
 		var _v0 = model.state;
 		switch (_v0.$) {
+			case 'Load':
+				return A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Momentje..')
+						]));
 			case 'Start':
 				return A2(
 					$elm$html$Html$div,
@@ -6457,9 +6617,11 @@ var $author$project$Main$view = function (model) {
 																	[
 																		$elm$html$Html$Attributes$type_('checkbox'),
 																		$elm$html$Html$Events$onClick(
-																		$author$project$Main$Check(tafel)),
+																		A2($elm$core$Set$member, tafel, model.achievements.tafels) ? $author$project$Main$NoCheck(tafel) : $author$project$Main$Check(tafel)),
 																		$elm$html$Html$Attributes$checked(
-																		A2($elm$core$Set$member, tafel, model.tafels))
+																		A2($elm$core$Set$member, tafel, model.tafels) || A2($elm$core$Set$member, tafel, model.achievements.tafels)),
+																		$elm$html$Html$Attributes$disabled(
+																		A2($elm$core$Set$member, tafel, model.achievements.tafels))
 																	]),
 																_List_Nil)
 															])),
