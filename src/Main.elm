@@ -92,7 +92,7 @@ keyMsg string =
 init flags =
     let
         storage =
-            LocalStoragePort.make "compurob.nl/tafels"
+            LocalStoragePort.make "tafels"
     in
     ( { tafels = Set.empty
       , exercises = []

@@ -5209,7 +5209,7 @@ var $author$project$LocalStoragePort$setItem = _Platform_outgoingPort(
 	});
 var $author$project$LocalStoragePort$make = A4($the_sett$elm_localstorage$LocalStorage$make, $author$project$LocalStoragePort$getItem, $author$project$LocalStoragePort$setItem, $author$project$LocalStoragePort$clear, $author$project$LocalStoragePort$listKeys);
 var $author$project$Main$init = function (flags) {
-	var storage = $author$project$LocalStoragePort$make('compurob.nl/tafels');
+	var storage = $author$project$LocalStoragePort$make('tafels');
 	return _Utils_Tuple2(
 		{
 			achievements: A2($author$project$Main$Achievements, $elm$core$Set$empty, 0),
