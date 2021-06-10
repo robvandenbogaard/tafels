@@ -227,9 +227,16 @@ advance model =
                     let
                         achievements =
                             Set.union model.tafels model.achievements.tafels
+
+                        newAchievements =
+                            if (Set.toList <| achievements) == List.range 0 12 then
+                                Set.empty
+
+                            else
+                                achievements
                     in
-                    ( { model | state = Finish, achievements = { tafels = achievements } }
-                    , [ ( "tafels", Encode.set Encode.int achievements ) ]
+                    ( { model | state = Finish, achievements = { tafels = newAchievements } }
+                    , [ ( "tafels", Encode.set Encode.int newAchievements ) ]
                         |> Encode.object
                         |> LocalStorage.setItem model.storage "achievements"
                     )

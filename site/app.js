@@ -5816,11 +5816,14 @@ var $author$project$Main$advance = function (model) {
 		var _v1 = $elm$core$List$reverse(model.report.fails);
 		if (!_v1.b) {
 			var achievements = A2($elm$core$Set$union, model.tafels, model.achievements.tafels);
+			var newAchievements = _Utils_eq(
+				$elm$core$Set$toList(achievements),
+				A2($elm$core$List$range, 0, 12)) ? $elm$core$Set$empty : achievements;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
 					{
-						achievements: {tafels: achievements},
+						achievements: {tafels: newAchievements},
 						state: $author$project$Main$Finish
 					}),
 				A3(
@@ -5832,7 +5835,7 @@ var $author$project$Main$advance = function (model) {
 							[
 								_Utils_Tuple2(
 								'tafels',
-								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, achievements))
+								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, newAchievements))
 							]))));
 		} else {
 			var fail = _v1.a;
