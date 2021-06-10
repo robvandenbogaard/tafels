@@ -38,6 +38,7 @@ type alias Exercise =
 
 type alias Achievements =
     { tafels : Set Int
+    , pokeballs : Int
     }
 
 
@@ -91,11 +92,11 @@ keyMsg string =
 init flags =
     let
         storage =
-            LocalStoragePort.make "compurob.nl/tafels:"
+            LocalStoragePort.make "compurob.nl/tafels"
     in
     ( { tafels = Set.empty
       , exercises = []
-      , achievements = Achievements Set.empty
+      , achievements = Achievements Set.empty 0
       , report = Report [] []
       , state = Load
       , storage = storage
@@ -196,11 +197,17 @@ update msg model =
             case res of
                 LocalStorage.Item key value ->
                     let
-                        achievements =
+                        tafelsDecoder =
                             Decode.list Decode.int
-                                |> Decode.field "tafels"
-                                |> Decode.andThen (Decode.succeed << Achievements << Set.fromList)
-                                |> (\a -> Decode.decodeValue a value)
+                                |> Decode.andThen (Decode.succeed << Set.fromList)
+
+                        achievementsDecoder =
+                            Decode.map2 Achievements
+                                (Decode.field "tafels" tafelsDecoder)
+                                (Decode.field "pokeballs" Decode.int)
+
+                        achievements =
+                            Decode.decodeValue achievementsDecoder value
                                 |> Result.withDefault model.achievements
                     in
                     ( { model | state = Start, achievements = achievements }, Cmd.none )
@@ -228,15 +235,23 @@ advance model =
                         achievements =
                             Set.union model.tafels model.achievements.tafels
 
-                        newAchievements =
+                        ( pokeballs, newAchievements ) =
                             if (Set.toList <| achievements) == List.range 0 12 then
-                                Set.empty
+                                ( model.achievements.pokeballs + 1, Set.empty )
 
                             else
-                                achievements
+                                ( model.achievements.pokeballs, achievements )
                     in
-                    ( { model | state = Finish, achievements = { tafels = newAchievements } }
-                    , [ ( "tafels", Encode.set Encode.int newAchievements ) ]
+                    ( { model
+                        | state = Finish
+                        , achievements =
+                            { tafels = newAchievements
+                            , pokeballs = pokeballs
+                            }
+                      }
+                    , [ ( "tafels", Encode.set Encode.int newAchievements )
+                      , ( "pokeballs", Encode.int pokeballs )
+                      ]
                         |> Encode.object
                         |> LocalStorage.setItem model.storage "achievements"
                     )
@@ -264,31 +279,42 @@ view model =
                             [ Html.text <| "Klaar voor de start? Welke tafels wil je doen?"
                             ]
                         , Html.p []
-                            [ Html.table [] <|
-                                List.map
-                                    (\tafel ->
-                                        Html.tr []
-                                            [ Html.td []
-                                                [ Html.input
-                                                    [ Html.type_ "checkbox"
-                                                    , Html.onClick <|
-                                                        if Set.member tafel model.achievements.tafels then
-                                                            NoCheck tafel
+                            [ Html.table [ Html.style "width" "100%" ] <|
+                                [ Html.tr []
+                                    [ Html.td [ Html.style "vertical-align" "top" ]
+                                        [ Html.table [] <|
+                                            List.map
+                                                (\tafel ->
+                                                    Html.tr []
+                                                        [ Html.td []
+                                                            [ Html.input
+                                                                [ Html.type_ "checkbox"
+                                                                , Html.onClick <|
+                                                                    if Set.member tafel model.achievements.tafels then
+                                                                        NoCheck tafel
 
-                                                        else
-                                                            Check tafel
-                                                    , Html.checked <|
-                                                        Set.member tafel model.tafels
-                                                            || Set.member tafel model.achievements.tafels
-                                                    , Html.disabled <|
-                                                        Set.member tafel model.achievements.tafels
-                                                    ]
-                                                    []
-                                                ]
-                                            , Html.td [] [ Html.text <| String.fromInt tafel ]
-                                            ]
-                                    )
-                                    (List.range 0 12)
+                                                                    else
+                                                                        Check tafel
+                                                                , Html.checked <|
+                                                                    Set.member tafel model.tafels
+                                                                        || Set.member tafel model.achievements.tafels
+                                                                , Html.disabled <|
+                                                                    Set.member tafel model.achievements.tafels
+                                                                ]
+                                                                []
+                                                            ]
+                                                        , Html.td [] [ Html.text <| String.fromInt tafel ]
+                                                        ]
+                                                )
+                                                (List.range 0 12)
+                                        ]
+                                    , Html.td [ Html.style "width" "60vw", Html.style "vertical-align" "top" ] []
+                                    , Html.td [ Html.style "text-align" "right", Html.style "vertical-align" "top" ] <|
+                                        List.map
+                                            (\_ -> Html.img [ Html.src "pokeball.png", Html.style "padding" "0.5em" ] [])
+                                            (List.range 1 model.achievements.pokeballs)
+                                    ]
+                                ]
                             ]
                         , Html.p []
                             [ Html.button [ Html.onClick Next ] [ Html.text "Start!" ]

@@ -5144,9 +5144,10 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
-var $author$project$Main$Achievements = function (tafels) {
-	return {tafels: tafels};
-};
+var $author$project$Main$Achievements = F2(
+	function (tafels, pokeballs) {
+		return {pokeballs: pokeballs, tafels: tafels};
+	});
 var $author$project$Main$Load = {$: 'Load'};
 var $author$project$Main$Report = F2(
 	function (successes, fails) {
@@ -5208,10 +5209,10 @@ var $author$project$LocalStoragePort$setItem = _Platform_outgoingPort(
 	});
 var $author$project$LocalStoragePort$make = A4($the_sett$elm_localstorage$LocalStorage$make, $author$project$LocalStoragePort$getItem, $author$project$LocalStoragePort$setItem, $author$project$LocalStoragePort$clear, $author$project$LocalStoragePort$listKeys);
 var $author$project$Main$init = function (flags) {
-	var storage = $author$project$LocalStoragePort$make('compurob.nl/tafels:');
+	var storage = $author$project$LocalStoragePort$make('compurob.nl/tafels');
 	return _Utils_Tuple2(
 		{
-			achievements: $author$project$Main$Achievements($elm$core$Set$empty),
+			achievements: A2($author$project$Main$Achievements, $elm$core$Set$empty, 0),
 			exercises: _List_Nil,
 			report: A2($author$project$Main$Report, _List_Nil, _List_Nil),
 			state: $author$project$Main$Load,
@@ -5816,14 +5817,16 @@ var $author$project$Main$advance = function (model) {
 		var _v1 = $elm$core$List$reverse(model.report.fails);
 		if (!_v1.b) {
 			var achievements = A2($elm$core$Set$union, model.tafels, model.achievements.tafels);
-			var newAchievements = _Utils_eq(
+			var _v2 = _Utils_eq(
 				$elm$core$Set$toList(achievements),
-				A2($elm$core$List$range, 0, 12)) ? $elm$core$Set$empty : achievements;
+				A2($elm$core$List$range, 0, 12)) ? _Utils_Tuple2(model.achievements.pokeballs + 1, $elm$core$Set$empty) : _Utils_Tuple2(model.achievements.pokeballs, achievements);
+			var pokeballs = _v2.a;
+			var newAchievements = _v2.b;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
 					{
-						achievements: {tafels: newAchievements},
+						achievements: {pokeballs: pokeballs, tafels: newAchievements},
 						state: $author$project$Main$Finish
 					}),
 				A3(
@@ -5835,7 +5838,10 @@ var $author$project$Main$advance = function (model) {
 							[
 								_Utils_Tuple2(
 								'tafels',
-								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, newAchievements))
+								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, newAchievements)),
+								_Utils_Tuple2(
+								'pokeballs',
+								$elm$json$Json$Encode$int(pokeballs))
 							]))));
 		} else {
 			var fail = _v1.a;
@@ -6429,22 +6435,19 @@ var $author$project$Main$update = F2(
 					case 'Item':
 						var key = res.a;
 						var value = res.b;
+						var tafelsDecoder = A2(
+							$elm$json$Json$Decode$andThen,
+							A2($elm$core$Basics$composeL, $elm$json$Json$Decode$succeed, $elm$core$Set$fromList),
+							$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
+						var achievementsDecoder = A3(
+							$elm$json$Json$Decode$map2,
+							$author$project$Main$Achievements,
+							A2($elm$json$Json$Decode$field, 'tafels', tafelsDecoder),
+							A2($elm$json$Json$Decode$field, 'pokeballs', $elm$json$Json$Decode$int));
 						var achievements = A2(
 							$elm$core$Result$withDefault,
 							model.achievements,
-							function (a) {
-								return A2($elm$json$Json$Decode$decodeValue, a, value);
-							}(
-								A2(
-									$elm$json$Json$Decode$andThen,
-									A2(
-										$elm$core$Basics$composeL,
-										A2($elm$core$Basics$composeL, $elm$json$Json$Decode$succeed, $author$project$Main$Achievements),
-										$elm$core$Set$fromList),
-									A2(
-										$elm$json$Json$Decode$field,
-										'tafels',
-										$elm$json$Json$Decode$list($elm$json$Json$Decode$int)))));
+							A2($elm$json$Json$Decode$decodeValue, achievementsDecoder, value));
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -6561,6 +6564,8 @@ var $elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -6600,45 +6605,97 @@ var $author$project$Main$view = function (model) {
 								[
 									A2(
 									$elm$html$Html$table,
-									_List_Nil,
-									A2(
-										$elm$core$List$map,
-										function (tafel) {
-											return A2(
-												$elm$html$Html$tr,
-												_List_Nil,
-												_List_fromArray(
-													[
-														A2(
-														$elm$html$Html$td,
-														_List_Nil,
-														_List_fromArray(
-															[
-																A2(
-																$elm$html$Html$input,
+									_List_fromArray(
+										[
+											A2($elm$html$Html$Attributes$style, 'width', '100%')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$tr,
+											_List_Nil,
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$td,
+													_List_fromArray(
+														[
+															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+														]),
+													_List_fromArray(
+														[
+															A2(
+															$elm$html$Html$table,
+															_List_Nil,
+															A2(
+																$elm$core$List$map,
+																function (tafel) {
+																	return A2(
+																		$elm$html$Html$tr,
+																		_List_Nil,
+																		_List_fromArray(
+																			[
+																				A2(
+																				$elm$html$Html$td,
+																				_List_Nil,
+																				_List_fromArray(
+																					[
+																						A2(
+																						$elm$html$Html$input,
+																						_List_fromArray(
+																							[
+																								$elm$html$Html$Attributes$type_('checkbox'),
+																								$elm$html$Html$Events$onClick(
+																								A2($elm$core$Set$member, tafel, model.achievements.tafels) ? $author$project$Main$NoCheck(tafel) : $author$project$Main$Check(tafel)),
+																								$elm$html$Html$Attributes$checked(
+																								A2($elm$core$Set$member, tafel, model.tafels) || A2($elm$core$Set$member, tafel, model.achievements.tafels)),
+																								$elm$html$Html$Attributes$disabled(
+																								A2($elm$core$Set$member, tafel, model.achievements.tafels))
+																							]),
+																						_List_Nil)
+																					])),
+																				A2(
+																				$elm$html$Html$td,
+																				_List_Nil,
+																				_List_fromArray(
+																					[
+																						$elm$html$Html$text(
+																						$elm$core$String$fromInt(tafel))
+																					]))
+																			]));
+																},
+																A2($elm$core$List$range, 0, 12)))
+														])),
+													A2(
+													$elm$html$Html$td,
+													_List_fromArray(
+														[
+															A2($elm$html$Html$Attributes$style, 'width', '60vw'),
+															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+														]),
+													_List_Nil),
+													A2(
+													$elm$html$Html$td,
+													_List_fromArray(
+														[
+															A2($elm$html$Html$Attributes$style, 'text-align', 'right'),
+															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+														]),
+													A2(
+														$elm$core$List$map,
+														function (_v1) {
+															return A2(
+																$elm$html$Html$img,
 																_List_fromArray(
 																	[
-																		$elm$html$Html$Attributes$type_('checkbox'),
-																		$elm$html$Html$Events$onClick(
-																		A2($elm$core$Set$member, tafel, model.achievements.tafels) ? $author$project$Main$NoCheck(tafel) : $author$project$Main$Check(tafel)),
-																		$elm$html$Html$Attributes$checked(
-																		A2($elm$core$Set$member, tafel, model.tafels) || A2($elm$core$Set$member, tafel, model.achievements.tafels)),
-																		$elm$html$Html$Attributes$disabled(
-																		A2($elm$core$Set$member, tafel, model.achievements.tafels))
+																		$elm$html$Html$Attributes$src('pokeball.png'),
+																		A2($elm$html$Html$Attributes$style, 'padding', '0.5em')
 																	]),
-																_List_Nil)
-															])),
-														A2(
-														$elm$html$Html$td,
-														_List_Nil,
-														_List_fromArray(
-															[
-																$elm$html$Html$text(
-																$elm$core$String$fromInt(tafel))
-															]))
-													]));
-										},
-										A2($elm$core$List$range, 0, 12)))
+																_List_Nil);
+														},
+														A2($elm$core$List$range, 1, model.achievements.pokeballs)))
+												]))
+										]))
 								])),
 							A2(
 							$elm$html$Html$p,
@@ -6685,9 +6742,9 @@ var $author$project$Main$view = function (model) {
 								]))
 						]));
 			case 'Prompt':
-				var _v1 = _v0.a;
-				var n1 = _v1.a;
-				var n2 = _v1.b;
+				var _v2 = _v0.a;
+				var n1 = _v2.a;
+				var n2 = _v2.b;
 				var input = _v0.b;
 				return A2(
 					$elm$html$Html$div,
@@ -6720,9 +6777,9 @@ var $author$project$Main$view = function (model) {
 								]))
 						]));
 			case 'CheckedSuccess':
-				var _v2 = _v0.a;
-				var n1 = _v2.a;
-				var n2 = _v2.b;
+				var _v3 = _v0.a;
+				var n1 = _v3.a;
+				var n2 = _v3.b;
 				return A2(
 					$elm$html$Html$div,
 					_List_Nil,
@@ -6754,9 +6811,9 @@ var $author$project$Main$view = function (model) {
 								]))
 						]));
 			default:
-				var _v3 = _v0.a;
-				var n1 = _v3.a;
-				var n2 = _v3.b;
+				var _v4 = _v0.a;
+				var n1 = _v4.a;
+				var n2 = _v4.b;
 				return A2(
 					$elm$html$Html$div,
 					_List_Nil,
