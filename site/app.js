@@ -4355,6 +4355,52 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5144,9 +5190,13 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
-var $author$project$Main$Achievements = F2(
-	function (tafels, pokeballs) {
-		return {pokeballs: pokeballs, tafels: tafels};
+var $author$project$Main$Achievements = F3(
+	function (tafels, pokeballs, fruits) {
+		return {fruits: fruits, pokeballs: pokeballs, tafels: tafels};
+	});
+var $author$project$Main$FruitBag = F5(
+	function (razzBerries, nanabBerries, pinapBerries, goldenRazzBerries, silverPinapBerries) {
+		return {goldenRazzBerries: goldenRazzBerries, nanabBerries: nanabBerries, pinapBerries: pinapBerries, razzBerries: razzBerries, silverPinapBerries: silverPinapBerries};
 	});
 var $author$project$Main$Load = {$: 'Load'};
 var $author$project$Main$Report = F2(
@@ -5212,72 +5262,69 @@ var $author$project$Main$init = function (flags) {
 	var storage = $author$project$LocalStoragePort$make('tafels');
 	return _Utils_Tuple2(
 		{
-			achievements: A2($author$project$Main$Achievements, $elm$core$Set$empty, 0),
+			achievements: A3(
+				$author$project$Main$Achievements,
+				$elm$core$Set$empty,
+				0,
+				A5($author$project$Main$FruitBag, 0, 0, 0, 0, 0)),
 			exercises: _List_Nil,
 			report: A2($author$project$Main$Report, _List_Nil, _List_Nil),
 			state: $author$project$Main$Load,
 			storage: storage,
-			tafels: $elm$core$Set$empty
+			tafels: $elm$core$Set$empty,
+			time: 0
 		},
 		A2($the_sett$elm_localstorage$LocalStorage$getItem, storage, 'achievements'));
 };
 var $author$project$Main$LocalStorageOp = function (a) {
 	return {$: 'LocalStorageOp', a: a};
 };
+var $author$project$Main$Tick = function (a) {
+	return {$: 'Tick', a: a};
+};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $author$project$Main$Next = {$: 'Next'};
-var $author$project$Main$keyMsg = function (string) {
-	if (string === 'Enter') {
-		return $elm$core$Maybe$Just($author$project$Main$Next);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$keyDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (msg) {
-		if (msg.$ === 'Nothing') {
-			return $elm$json$Json$Decode$fail('key passed on');
-		} else {
-			var m = msg.a;
-			return $elm$json$Json$Decode$succeed(m);
+var $elm$time$Time$Every = F2(
+	function (a, b) {
+		return {$: 'Every', a: a, b: b};
+	});
+var $elm$time$Time$State = F2(
+	function (taggers, processes) {
+		return {processes: processes, taggers: taggers};
+	});
+var $elm$time$Time$init = $elm$core$Task$succeed(
+	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
 		}
-	},
-	A2(
-		$elm$json$Json$Decode$map,
-		$author$project$Main$keyMsg,
-		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
 	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
-	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5338,7 +5385,6 @@ var $elm$core$Dict$balance = F5(
 			}
 		}
 	});
-var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
 		if (dict.$ === 'RBEmpty_elm_builtin') {
@@ -5387,18 +5433,27 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
+var $elm$time$Time$addMySub = F2(
+	function (_v0, state) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		var _v1 = A2($elm$core$Dict$get, interval, state);
+		if (_v1.$ === 'Nothing') {
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				_List_fromArray(
+					[tagger]),
+				state);
+		} else {
+			var taggers = _v1.a;
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				A2($elm$core$List$cons, tagger, taggers),
+				state);
+		}
+	});
 var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
@@ -5486,11 +5541,230 @@ var $elm$core$Dict$merge = F6(
 			intermediateResult,
 			leftovers);
 	});
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$setInterval = _Time_setInterval;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$time$Time$spawnHelp = F3(
+	function (router, intervals, processes) {
+		if (!intervals.b) {
+			return $elm$core$Task$succeed(processes);
+		} else {
+			var interval = intervals.a;
+			var rest = intervals.b;
+			var spawnTimer = $elm$core$Process$spawn(
+				A2(
+					$elm$time$Time$setInterval,
+					interval,
+					A2($elm$core$Platform$sendToSelf, router, interval)));
+			var spawnRest = function (id) {
+				return A3(
+					$elm$time$Time$spawnHelp,
+					router,
+					rest,
+					A3($elm$core$Dict$insert, interval, id, processes));
+			};
+			return A2($elm$core$Task$andThen, spawnRest, spawnTimer);
+		}
+	});
+var $elm$time$Time$onEffects = F3(
+	function (router, subs, _v0) {
+		var processes = _v0.processes;
+		var rightStep = F3(
+			function (_v6, id, _v7) {
+				var spawns = _v7.a;
+				var existing = _v7.b;
+				var kills = _v7.c;
+				return _Utils_Tuple3(
+					spawns,
+					existing,
+					A2(
+						$elm$core$Task$andThen,
+						function (_v5) {
+							return kills;
+						},
+						$elm$core$Process$kill(id)));
+			});
+		var newTaggers = A3($elm$core$List$foldl, $elm$time$Time$addMySub, $elm$core$Dict$empty, subs);
+		var leftStep = F3(
+			function (interval, taggers, _v4) {
+				var spawns = _v4.a;
+				var existing = _v4.b;
+				var kills = _v4.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, interval, spawns),
+					existing,
+					kills);
+			});
+		var bothStep = F4(
+			function (interval, taggers, id, _v3) {
+				var spawns = _v3.a;
+				var existing = _v3.b;
+				var kills = _v3.c;
+				return _Utils_Tuple3(
+					spawns,
+					A3($elm$core$Dict$insert, interval, id, existing),
+					kills);
+			});
+		var _v1 = A6(
+			$elm$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			newTaggers,
+			processes,
+			_Utils_Tuple3(
+				_List_Nil,
+				$elm$core$Dict$empty,
+				$elm$core$Task$succeed(_Utils_Tuple0)));
+		var spawnList = _v1.a;
+		var existingDict = _v1.b;
+		var killTask = _v1.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (newProcesses) {
+				return $elm$core$Task$succeed(
+					A2($elm$time$Time$State, newTaggers, newProcesses));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v2) {
+					return A3($elm$time$Time$spawnHelp, router, spawnList, existingDict);
+				},
+				killTask));
+	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $elm$time$Time$onSelfMsg = F3(
+	function (router, interval, state) {
+		var _v0 = A2($elm$core$Dict$get, interval, state.taggers);
+		if (_v0.$ === 'Nothing') {
+			return $elm$core$Task$succeed(state);
+		} else {
+			var taggers = _v0.a;
+			var tellTaggers = function (time) {
+				return $elm$core$Task$sequence(
+					A2(
+						$elm$core$List$map,
+						function (tagger) {
+							return A2(
+								$elm$core$Platform$sendToApp,
+								router,
+								tagger(time));
+						},
+						taggers));
+			};
+			return A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$succeed(state);
+				},
+				A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
+		}
+	});
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$time$Time$subMap = F2(
+	function (f, _v0) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		return A2(
+			$elm$time$Time$Every,
+			interval,
+			A2($elm$core$Basics$composeL, f, tagger));
+	});
+_Platform_effectManagers['Time'] = _Platform_createManager($elm$time$Time$init, $elm$time$Time$onEffects, $elm$time$Time$onSelfMsg, 0, $elm$time$Time$subMap);
+var $elm$time$Time$subscription = _Platform_leaf('Time');
+var $elm$time$Time$every = F2(
+	function (interval, tagger) {
+		return $elm$time$Time$subscription(
+			A2($elm$time$Time$Every, interval, tagger));
+	});
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $author$project$Main$Next = {$: 'Next'};
+var $author$project$Main$keyMsg = function (string) {
+	if (string === 'Enter') {
+		return $elm$core$Maybe$Just($author$project$Main$Next);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$keyDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (msg) {
+		if (msg.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('key passed on');
+		} else {
+			var m = msg.a;
+			return $elm$json$Json$Decode$succeed(m);
+		}
+	},
+	A2(
+		$elm$json$Json$Decode$map,
+		$author$project$Main$keyMsg,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
 		return {event: event, key: key};
 	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _v0) {
 		var node = _v0.a;
@@ -5736,13 +6010,14 @@ var $author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				$elm$browser$Browser$Events$onKeyDown($author$project$Main$keyDecoder),
+				A2($elm$time$Time$every, 100, $author$project$Main$Tick),
 				$author$project$LocalStoragePort$response(
 				A2($the_sett$elm_localstorage$LocalStorage$responseHandler, $author$project$Main$LocalStorageOp, model.storage))
 			]));
 };
-var $author$project$Main$Prompt = F2(
-	function (a, b) {
-		return {$: 'Prompt', a: a, b: b};
+var $author$project$Main$Prompt = F4(
+	function (a, b, c, d) {
+		return {$: 'Prompt', a: a, b: b, c: c, d: d};
 	});
 var $author$project$Main$Start = {$: 'Start'};
 var $author$project$Main$Finish = {$: 'Finish'};
@@ -5793,6 +6068,55 @@ var $the_sett$elm_localstorage$LocalStorage$setItem = F3(
 				A2($the_sett$elm_localstorage$LocalStorage$addPrefix, prefix, key),
 				value));
 	});
+var $author$project$Main$GoldenRazzBerry = {$: 'GoldenRazzBerry'};
+var $author$project$Main$NanabBerry = {$: 'NanabBerry'};
+var $author$project$Main$PinapBerry = {$: 'PinapBerry'};
+var $author$project$Main$RazzBerry = {$: 'RazzBerry'};
+var $author$project$Main$SilverPinapBerry = {$: 'SilverPinapBerry'};
+var $author$project$Main$treeForExercise = function (_v0) {
+	var tafel = _v0.b;
+	switch (tafel) {
+		case 0:
+			return _List_Nil;
+		case 1:
+			return _List_Nil;
+		case 2:
+			return _List_fromArray(
+				[$author$project$Main$RazzBerry]);
+		case 3:
+			return _List_fromArray(
+				[$author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 4:
+			return _List_fromArray(
+				[$author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 5:
+			return _List_fromArray(
+				[$author$project$Main$RazzBerry]);
+		case 6:
+			return _List_fromArray(
+				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 7:
+			return _List_fromArray(
+				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 8:
+			return _List_fromArray(
+				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 9:
+			return _List_fromArray(
+				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 10:
+			return _List_fromArray(
+				[$author$project$Main$RazzBerry]);
+		case 11:
+			return _List_fromArray(
+				[$author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		case 12:
+			return _List_fromArray(
+				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+		default:
+			return _List_Nil;
+	}
+};
 var $elm$core$Set$union = F2(
 	function (_v0, _v1) {
 		var dict1 = _v0.a;
@@ -5810,12 +6134,38 @@ var $author$project$Main$advance = function (model) {
 				model,
 				{
 					exercises: exercises,
-					state: A2($author$project$Main$Prompt, nextExercise, '')
+					state: A4(
+						$author$project$Main$Prompt,
+						nextExercise,
+						'',
+						$author$project$Main$treeForExercise(nextExercise),
+						model.time)
 				}),
 			$elm$core$Platform$Cmd$none);
 	} else {
 		var _v1 = $elm$core$List$reverse(model.report.fails);
 		if (!_v1.b) {
+			var fruitsEncoder = function (fruits) {
+				return $elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'RazzBerries',
+							$elm$json$Json$Encode$int(fruits.razzBerries)),
+							_Utils_Tuple2(
+							'NanabBerries',
+							$elm$json$Json$Encode$int(fruits.nanabBerries)),
+							_Utils_Tuple2(
+							'PinapBerries',
+							$elm$json$Json$Encode$int(fruits.pinapBerries)),
+							_Utils_Tuple2(
+							'GoldenRazzBerries',
+							$elm$json$Json$Encode$int(fruits.goldenRazzBerries)),
+							_Utils_Tuple2(
+							'SilverPinapBerries',
+							$elm$json$Json$Encode$int(fruits.silverPinapBerries))
+						]));
+			};
 			var achievements = A2($elm$core$Set$union, model.tafels, model.achievements.tafels);
 			var _v2 = _Utils_eq(
 				$elm$core$Set$toList(achievements),
@@ -5826,7 +6176,7 @@ var $author$project$Main$advance = function (model) {
 				_Utils_update(
 					model,
 					{
-						achievements: {pokeballs: pokeballs, tafels: newAchievements},
+						achievements: {fruits: model.achievements.fruits, pokeballs: pokeballs, tafels: newAchievements},
 						state: $author$project$Main$Finish
 					}),
 				A3(
@@ -5841,7 +6191,10 @@ var $author$project$Main$advance = function (model) {
 								A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, newAchievements)),
 								_Utils_Tuple2(
 								'pokeballs',
-								$elm$json$Json$Encode$int(pokeballs))
+								$elm$json$Json$Encode$int(pokeballs)),
+								_Utils_Tuple2(
+								'fruits',
+								fruitsEncoder(model.achievements.fruits))
 							]))));
 		} else {
 			var fail = _v1.a;
@@ -5852,17 +6205,12 @@ var $author$project$Main$advance = function (model) {
 					{
 						exercises: fails,
 						report: A2($author$project$Main$Report, model.report.successes, _List_Nil),
-						state: A2($author$project$Main$Prompt, fail, '')
+						state: A4($author$project$Main$Prompt, fail, '', _List_Nil, model.time)
 					}),
 				$elm$core$Platform$Cmd$none);
 		}
 	}
 };
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5912,37 +6260,8 @@ var $elm$core$Set$isEmpty = function (_v0) {
 	return $elm$core$Dict$isEmpty(dict);
 };
 var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
-		}
-	});
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$map5 = _Json_map5;
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
@@ -5958,6 +6277,10 @@ var $elm$core$Set$member = F2(
 		return A2($elm$core$Dict$member, key, dict);
 	});
 var $elm$core$Basics$not = _Basics_not;
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -6374,34 +6697,69 @@ var $author$project$Main$update = F2(
 						var n1 = _v3.a;
 						var n2 = _v3.b;
 						var input = _v2.b;
+						var tree = _v2.c;
 						var _v4 = $elm$core$String$toInt(input);
 						if (_v4.$ === 'Nothing') {
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						} else {
 							var n = _v4.a;
-							return _Utils_eq(n1 * n2, n) ? $author$project$Main$advance(
-								_Utils_update(
-									model,
-									{
-										report: {
-											fails: model.report.fails,
-											successes: A2(
-												$elm$core$List$cons,
-												_Utils_Tuple2(n1, n2),
-												model.report.successes)
+							if (_Utils_eq(n1 * n2, n)) {
+								var incrementFruit = F2(
+									function (fruit, fruits) {
+										switch (fruit.$) {
+											case 'RazzBerry':
+												return _Utils_update(
+													fruits,
+													{razzBerries: fruits.razzBerries + 1});
+											case 'NanabBerry':
+												return _Utils_update(
+													fruits,
+													{nanabBerries: fruits.nanabBerries + 1});
+											case 'PinapBerry':
+												return _Utils_update(
+													fruits,
+													{pinapBerries: fruits.pinapBerries + 1});
+											case 'GoldenRazzBerry':
+												return _Utils_update(
+													fruits,
+													{goldenRazzBerries: fruits.goldenRazzBerries + 1});
+											default:
+												return _Utils_update(
+													fruits,
+													{silverPinapBerries: fruits.silverPinapBerries + 1});
 										}
-									})) : $author$project$Main$advance(
-								_Utils_update(
-									model,
-									{
-										report: {
-											fails: A2(
-												$elm$core$List$cons,
-												_Utils_Tuple2(n1, n2),
-												model.report.fails),
-											successes: model.report.successes
-										}
-									}));
+									});
+								return $author$project$Main$advance(
+									_Utils_update(
+										model,
+										{
+											achievements: {
+												fruits: A3($elm$core$List$foldl, incrementFruit, model.achievements.fruits, tree),
+												pokeballs: model.achievements.pokeballs,
+												tafels: model.achievements.tafels
+											},
+											report: {
+												fails: model.report.fails,
+												successes: A2(
+													$elm$core$List$cons,
+													_Utils_Tuple2(n1, n2),
+													model.report.successes)
+											}
+										}));
+							} else {
+								return $author$project$Main$advance(
+									_Utils_update(
+										model,
+										{
+											report: {
+												fails: A2(
+													$elm$core$List$cons,
+													_Utils_Tuple2(n1, n2),
+													model.report.fails),
+												successes: model.report.successes
+											}
+										}));
+							}
 						}
 					case 'CheckedSuccess':
 						return $author$project$Main$advance(model);
@@ -6416,18 +6774,58 @@ var $author$project$Main$update = F2(
 				}
 			case 'Input':
 				var input = msg.a;
-				var _v5 = model.state;
-				if (_v5.$ === 'Prompt') {
-					var p = _v5.a;
+				var _v6 = model.state;
+				if (_v6.$ === 'Prompt') {
+					var p = _v6.a;
+					var t = _v6.c;
+					var start = _v6.d;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								state: A2($author$project$Main$Prompt, p, input)
+								state: A4($author$project$Main$Prompt, p, input, t, start)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'Tick':
+				var posix = msg.a;
+				var millis = $elm$time$Time$posixToMillis(posix);
+				var _v7 = model.state;
+				if ((_v7.$ === 'Prompt') && _v7.c.b) {
+					var p = _v7.a;
+					var i = _v7.b;
+					var _v8 = _v7.c;
+					var fruit = _v8.a;
+					var fruits = _v8.b;
+					var start = _v7.d;
+					return ((millis - start) > 1000) ? _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								state: A4($author$project$Main$Prompt, p, i, fruits, millis),
+								time: millis
+							}),
+						$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								state: A4(
+									$author$project$Main$Prompt,
+									p,
+									i,
+									A2($elm$core$List$cons, fruit, fruits),
+									start),
+								time: millis
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{time: millis}),
+						$elm$core$Platform$Cmd$none);
 				}
 			default:
 				var res = msg.a;
@@ -6439,11 +6837,20 @@ var $author$project$Main$update = F2(
 							$elm$json$Json$Decode$andThen,
 							A2($elm$core$Basics$composeL, $elm$json$Json$Decode$succeed, $elm$core$Set$fromList),
 							$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
-						var achievementsDecoder = A3(
-							$elm$json$Json$Decode$map2,
+						var fruitsDecoder = A6(
+							$elm$json$Json$Decode$map5,
+							$author$project$Main$FruitBag,
+							A2($elm$json$Json$Decode$field, 'RazzBerries', $elm$json$Json$Decode$int),
+							A2($elm$json$Json$Decode$field, 'NanabBerries', $elm$json$Json$Decode$int),
+							A2($elm$json$Json$Decode$field, 'PinapBerries', $elm$json$Json$Decode$int),
+							A2($elm$json$Json$Decode$field, 'GoldenRazzBerries', $elm$json$Json$Decode$int),
+							A2($elm$json$Json$Decode$field, 'SilverPinapBerries', $elm$json$Json$Decode$int));
+						var achievementsDecoder = A4(
+							$elm$json$Json$Decode$map3,
 							$author$project$Main$Achievements,
 							A2($elm$json$Json$Decode$field, 'tafels', tafelsDecoder),
-							A2($elm$json$Json$Decode$field, 'pokeballs', $elm$json$Json$Decode$int));
+							A2($elm$json$Json$Decode$field, 'pokeballs', $elm$json$Json$Decode$int),
+							A2($elm$json$Json$Decode$field, 'fruits', fruitsDecoder));
 						var achievements = A2(
 							$elm$core$Result$withDefault,
 							model.achievements,
@@ -6499,6 +6906,20 @@ var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $author$project$Main$fruitImage = function (fruit) {
+	switch (fruit.$) {
+		case 'RazzBerry':
+			return 'GO_Razz_Berry.png';
+		case 'NanabBerry':
+			return 'GO_Nanab_Berry.png';
+		case 'PinapBerry':
+			return 'GO_Pinap_Berry.png';
+		case 'GoldenRazzBerry':
+			return 'GO_Golden_Razz_Berry.png';
+		default:
+			return 'GO_Silver_Pinap_Berry.png';
+	}
+};
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -6573,6 +6994,76 @@ var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$viewFruit = function (_v0) {
+	var x = _v0.a;
+	var y = _v0.b;
+	var fruit = _v0.c;
+	return A2(
+		$elm$html$Html$img,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$src(
+				$author$project$Main$fruitImage(fruit)),
+				A2($elm$html$Html$Attributes$style, 'height', '7vh'),
+				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'top',
+				$elm$core$String$fromInt(
+					$elm$core$Basics$floor(7 + (40 * y))) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'left',
+				$elm$core$String$fromInt(
+					$elm$core$Basics$floor(12 + (50 * x))) + '%')
+			]),
+		_List_Nil);
+};
+var $author$project$Main$viewTree = function (tree) {
+	var prand = function (seed) {
+		return A2($elm$core$Debug$log, 'rand', (3.95 * seed) * (1.0 - seed));
+	};
+	var randcoords = F2(
+		function (fruit, _v0) {
+			var cs = _v0.a;
+			var seed = _v0.b;
+			var r1 = seed;
+			var r2 = prand(
+				prand(r1));
+			var r3 = prand(
+				prand(
+					prand(r2)));
+			return _Utils_Tuple2(
+				A2(
+					$elm$core$List$cons,
+					_Utils_Tuple3(r1, r2, fruit),
+					cs),
+				r3);
+		});
+	var coords = A3(
+		$elm$core$List$foldl,
+		randcoords,
+		_Utils_Tuple2(_List_Nil, 0.3625634),
+		tree).a;
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+				A2($elm$html$Html$Attributes$style, 'display', 'inline-block')
+			]),
+		A2(
+			$elm$core$List$cons,
+			A2(
+				$elm$html$Html$img,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$src('SwSh_Berry_tree.png'),
+						A2($elm$html$Html$Attributes$style, 'height', '50vh')
+					]),
+				_List_Nil),
+			A2($elm$core$List$map, $author$project$Main$viewFruit, coords)));
+};
 var $author$project$Main$view = function (model) {
 	var html = function () {
 		var _v0 = model.state;
@@ -6620,7 +7111,8 @@ var $author$project$Main$view = function (model) {
 													$elm$html$Html$td,
 													_List_fromArray(
 														[
-															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top'),
+															A2($elm$html$Html$Attributes$style, 'width', '5em')
 														]),
 													_List_fromArray(
 														[
@@ -6673,7 +7165,61 @@ var $author$project$Main$view = function (model) {
 															A2($elm$html$Html$Attributes$style, 'width', '60vw'),
 															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
 														]),
-													_List_Nil),
+													A2(
+														$elm$core$List$map,
+														function (_v1) {
+															var fruitFun = _v1.a;
+															var fruit = _v1.b;
+															return A2(
+																$elm$html$Html$div,
+																_List_fromArray(
+																	[
+																		A2($elm$html$Html$Attributes$style, 'text-align', 'left')
+																	]),
+																_List_fromArray(
+																	[
+																		A2(
+																		$elm$html$Html$img,
+																		_List_fromArray(
+																			[
+																				$elm$html$Html$Attributes$src(
+																				$author$project$Main$fruitImage(fruit)),
+																				A2($elm$html$Html$Attributes$style, 'height', '10vh')
+																			]),
+																		_List_Nil),
+																		$elm$html$Html$text(
+																		$elm$core$String$fromInt(
+																			fruitFun(model.achievements.fruits)))
+																	]));
+														},
+														_List_fromArray(
+															[
+																_Utils_Tuple2(
+																function ($) {
+																	return $.goldenRazzBerries;
+																},
+																$author$project$Main$GoldenRazzBerry),
+																_Utils_Tuple2(
+																function ($) {
+																	return $.silverPinapBerries;
+																},
+																$author$project$Main$SilverPinapBerry),
+																_Utils_Tuple2(
+																function ($) {
+																	return $.pinapBerries;
+																},
+																$author$project$Main$PinapBerry),
+																_Utils_Tuple2(
+																function ($) {
+																	return $.nanabBerries;
+																},
+																$author$project$Main$NanabBerry),
+																_Utils_Tuple2(
+																function ($) {
+																	return $.razzBerries;
+																},
+																$author$project$Main$RazzBerry)
+															]))),
 													A2(
 													$elm$html$Html$td,
 													_List_fromArray(
@@ -6683,7 +7229,7 @@ var $author$project$Main$view = function (model) {
 														]),
 													A2(
 														$elm$core$List$map,
-														function (_v1) {
+														function (_v2) {
 															return A2(
 																$elm$html$Html$img,
 																_List_fromArray(
@@ -6742,10 +7288,11 @@ var $author$project$Main$view = function (model) {
 								]))
 						]));
 			case 'Prompt':
-				var _v2 = _v0.a;
-				var n1 = _v2.a;
-				var n2 = _v2.b;
+				var _v3 = _v0.a;
+				var n1 = _v3.a;
+				var n2 = _v3.b;
 				var input = _v0.b;
+				var tree = _v0.c;
 				return A2(
 					$elm$html$Html$div,
 					_List_Nil,
@@ -6774,12 +7321,13 @@ var $author$project$Main$view = function (model) {
 											$elm$html$Html$Attributes$value(input)
 										]),
 									_List_Nil)
-								]))
+								])),
+							$author$project$Main$viewTree(tree)
 						]));
 			case 'CheckedSuccess':
-				var _v3 = _v0.a;
-				var n1 = _v3.a;
-				var n2 = _v3.b;
+				var _v4 = _v0.a;
+				var n1 = _v4.a;
+				var n2 = _v4.b;
 				return A2(
 					$elm$html$Html$div,
 					_List_Nil,
@@ -6811,9 +7359,9 @@ var $author$project$Main$view = function (model) {
 								]))
 						]));
 			default:
-				var _v4 = _v0.a;
-				var n1 = _v4.a;
-				var n2 = _v4.b;
+				var _v5 = _v0.a;
+				var n1 = _v5.a;
+				var n2 = _v5.b;
 				return A2(
 					$elm$html$Html$div,
 					_List_Nil,
