@@ -5190,99 +5190,24 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$document = _Browser_document;
-var $author$project$Main$Achievements = F3(
-	function (tafels, pokeballs, fruits) {
-		return {fruits: fruits, pokeballs: pokeballs, tafels: tafels};
-	});
-var $author$project$Main$FruitBag = F5(
-	function (razzBerries, nanabBerries, pinapBerries, goldenRazzBerries, silverPinapBerries) {
-		return {goldenRazzBerries: goldenRazzBerries, nanabBerries: nanabBerries, pinapBerries: pinapBerries, razzBerries: razzBerries, silverPinapBerries: silverPinapBerries};
-	});
-var $author$project$Main$Load = {$: 'Load'};
-var $author$project$Main$Report = F2(
-	function (successes, fails) {
-		return {fails: fails, successes: successes};
-	});
-var $elm$core$Set$Set_elm_builtin = function (a) {
-	return {$: 'Set_elm_builtin', a: a};
-};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
-var $the_sett$elm_localstorage$LocalStorage$addPrefix = F2(
-	function (prefix, key) {
-		return (prefix === '') ? key : (prefix + ('.' + key));
-	});
-var $the_sett$elm_localstorage$LocalStorage$getItem = F2(
-	function (_v0, key) {
-		var _v1 = _v0.a;
-		var ports = _v1.a;
-		var prefix = _v1.b;
-		return ports.getItem(
-			A2($the_sett$elm_localstorage$LocalStorage$addPrefix, prefix, key));
-	});
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$LocalStoragePort$clear = _Platform_outgoingPort('clear', $elm$json$Json$Encode$string);
-var $author$project$LocalStoragePort$getItem = _Platform_outgoingPort('getItem', $elm$json$Json$Encode$string);
-var $author$project$LocalStoragePort$listKeys = _Platform_outgoingPort('listKeys', $elm$json$Json$Encode$string);
-var $the_sett$elm_localstorage$LocalStorage$LocalStorage = function (a) {
-	return {$: 'LocalStorage', a: a};
-};
-var $the_sett$elm_localstorage$LocalStorage$make = F5(
-	function (getPort, setPort, clearPort, listKeysPort, prefix) {
-		var ports = {clear: clearPort, getItem: getPort, listKeys: listKeysPort, setItem: setPort};
-		return $the_sett$elm_localstorage$LocalStorage$LocalStorage(
-			_Utils_Tuple2(ports, prefix));
-	});
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $author$project$LocalStoragePort$setItem = _Platform_outgoingPort(
-	'setItem',
-	function ($) {
-		var a = $.a;
-		var b = $.b;
-		return A2(
-			$elm$json$Json$Encode$list,
-			$elm$core$Basics$identity,
-			_List_fromArray(
-				[
-					$elm$json$Json$Encode$string(a),
-					$elm$core$Basics$identity(b)
-				]));
-	});
-var $author$project$LocalStoragePort$make = A4($the_sett$elm_localstorage$LocalStorage$make, $author$project$LocalStoragePort$getItem, $author$project$LocalStoragePort$setItem, $author$project$LocalStoragePort$clear, $author$project$LocalStoragePort$listKeys);
+var $author$project$Main$Menu = {$: 'Menu'};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (flags) {
-	var storage = $author$project$LocalStoragePort$make('tafels');
-	return _Utils_Tuple2(
-		{
-			achievements: A3(
-				$author$project$Main$Achievements,
-				$elm$core$Set$empty,
-				0,
-				A5($author$project$Main$FruitBag, 0, 0, 0, 0, 0)),
-			exercises: _List_Nil,
-			report: A2($author$project$Main$Report, _List_Nil, _List_Nil),
-			state: $author$project$Main$Load,
-			storage: storage,
-			tafels: $elm$core$Set$empty,
-			time: 0
-		},
-		A2($the_sett$elm_localstorage$LocalStorage$getItem, storage, 'achievements'));
+	return _Utils_Tuple2($author$project$Main$Menu, $elm$core$Platform$Cmd$none);
 };
-var $author$project$Main$LocalStorageOp = function (a) {
+var $author$project$Main$PokeSumsMsg = function (a) {
+	return {$: 'PokeSumsMsg', a: a};
+};
+var $elm$core$Platform$Sub$map = _Platform_map;
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$PokeSums$LocalStorageOp = function (a) {
 	return {$: 'LocalStorageOp', a: a};
 };
-var $author$project$Main$Tick = function (a) {
+var $author$project$PokeSums$Tick = function (a) {
 	return {$: 'Tick', a: a};
 };
-var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$time$Time$Every = F2(
 	function (a, b) {
 		return {$: 'Every', a: a, b: b};
@@ -5291,6 +5216,8 @@ var $elm$time$Time$State = F2(
 	function (taggers, processes) {
 		return {processes: processes, taggers: taggers};
 	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$time$Time$init = $elm$core$Task$succeed(
 	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
 var $elm$core$Basics$compare = _Utils_compare;
@@ -5699,16 +5626,16 @@ var $elm$time$Time$every = F2(
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $elm$json$Json$Decode$field = _Json_decodeField;
-var $author$project$Main$Next = {$: 'Next'};
-var $author$project$Main$keyMsg = function (string) {
+var $author$project$PokeSums$Next = {$: 'Next'};
+var $author$project$PokeSums$keyMsg = function (string) {
 	if (string === 'Enter') {
-		return $elm$core$Maybe$Just($author$project$Main$Next);
+		return $elm$core$Maybe$Just($author$project$PokeSums$Next);
 	} else {
 		return $elm$core$Maybe$Nothing;
 	}
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$keyDecoder = A2(
+var $author$project$PokeSums$keyDecoder = A2(
 	$elm$json$Json$Decode$andThen,
 	function (msg) {
 		if (msg.$ === 'Nothing') {
@@ -5720,7 +5647,7 @@ var $author$project$Main$keyDecoder = A2(
 	},
 	A2(
 		$elm$json$Json$Decode$map,
-		$author$project$Main$keyMsg,
+		$author$project$PokeSums$keyMsg,
 		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)));
 var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$MySub = F3(
@@ -6005,25 +5932,54 @@ var $the_sett$elm_localstorage$LocalStorage$responseHandler = F3(
 					$elm$json$Json$Decode$errorToString(err)));
 		}
 	});
-var $author$project$Main$subscriptions = function (model) {
+var $author$project$PokeSums$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				$elm$browser$Browser$Events$onKeyDown($author$project$Main$keyDecoder),
-				A2($elm$time$Time$every, 100, $author$project$Main$Tick),
+				$elm$browser$Browser$Events$onKeyDown($author$project$PokeSums$keyDecoder),
+				A2($elm$time$Time$every, 100, $author$project$PokeSums$Tick),
 				$author$project$LocalStoragePort$response(
-				A2($the_sett$elm_localstorage$LocalStorage$responseHandler, $author$project$Main$LocalStorageOp, model.storage))
+				A2($the_sett$elm_localstorage$LocalStorage$responseHandler, $author$project$PokeSums$LocalStorageOp, model.storage))
 			]));
 };
-var $author$project$Main$Prompt = F4(
+var $author$project$Main$subscriptions = function (model) {
+	if (model.$ === 'Menu') {
+		return $elm$core$Platform$Sub$none;
+	} else {
+		var pokesums = model.a;
+		return A2(
+			$elm$core$Platform$Sub$map,
+			$author$project$Main$PokeSumsMsg,
+			$author$project$PokeSums$subscriptions(pokesums));
+	}
+};
+var $author$project$Main$PokeSums = function (a) {
+	return {$: 'PokeSums', a: a};
+};
+var $elm$core$Platform$Cmd$map = _Platform_map;
+var $author$project$PokeSums$Achievements = F3(
+	function (tafels, pokeballs, fruits) {
+		return {fruits: fruits, pokeballs: pokeballs, tafels: tafels};
+	});
+var $author$project$PokeSums$FruitBag = F5(
+	function (razzBerries, nanabBerries, pinapBerries, goldenRazzBerries, silverPinapBerries) {
+		return {goldenRazzBerries: goldenRazzBerries, nanabBerries: nanabBerries, pinapBerries: pinapBerries, razzBerries: razzBerries, silverPinapBerries: silverPinapBerries};
+	});
+var $author$project$PokeSums$Prompt = F4(
 	function (a, b, c, d) {
 		return {$: 'Prompt', a: a, b: b, c: c, d: d};
 	});
-var $author$project$Main$Start = {$: 'Start'};
-var $author$project$Main$Finish = {$: 'Finish'};
+var $author$project$PokeSums$Start = {$: 'Start'};
+var $author$project$PokeSums$Finish = {$: 'Finish'};
+var $author$project$PokeSums$Report = F2(
+	function (successes, fails) {
+		return {fails: fails, successes: successes};
+	});
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
 var $elm$json$Json$Encode$int = _Json_wrap;
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -6058,6 +6014,10 @@ var $elm$json$Json$Encode$set = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
+var $the_sett$elm_localstorage$LocalStorage$addPrefix = F2(
+	function (prefix, key) {
+		return (prefix === '') ? key : (prefix + ('.' + key));
+	});
 var $the_sett$elm_localstorage$LocalStorage$setItem = F3(
 	function (_v0, key, value) {
 		var _v1 = _v0.a;
@@ -6068,12 +6028,12 @@ var $the_sett$elm_localstorage$LocalStorage$setItem = F3(
 				A2($the_sett$elm_localstorage$LocalStorage$addPrefix, prefix, key),
 				value));
 	});
-var $author$project$Main$GoldenRazzBerry = {$: 'GoldenRazzBerry'};
-var $author$project$Main$NanabBerry = {$: 'NanabBerry'};
-var $author$project$Main$PinapBerry = {$: 'PinapBerry'};
-var $author$project$Main$RazzBerry = {$: 'RazzBerry'};
-var $author$project$Main$SilverPinapBerry = {$: 'SilverPinapBerry'};
-var $author$project$Main$treeForExercise = function (_v0) {
+var $author$project$PokeSums$GoldenRazzBerry = {$: 'GoldenRazzBerry'};
+var $author$project$PokeSums$NanabBerry = {$: 'NanabBerry'};
+var $author$project$PokeSums$PinapBerry = {$: 'PinapBerry'};
+var $author$project$PokeSums$RazzBerry = {$: 'RazzBerry'};
+var $author$project$PokeSums$SilverPinapBerry = {$: 'SilverPinapBerry'};
+var $author$project$PokeSums$treeForExercise = function (_v0) {
 	var tafel = _v0.b;
 	switch (tafel) {
 		case 0:
@@ -6082,37 +6042,37 @@ var $author$project$Main$treeForExercise = function (_v0) {
 			return _List_Nil;
 		case 2:
 			return _List_fromArray(
-				[$author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$RazzBerry]);
 		case 3:
 			return _List_fromArray(
-				[$author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 4:
 			return _List_fromArray(
-				[$author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 5:
 			return _List_fromArray(
-				[$author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$RazzBerry]);
 		case 6:
 			return _List_fromArray(
-				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$GoldenRazzBerry, $author$project$PokeSums$SilverPinapBerry, $author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 7:
 			return _List_fromArray(
-				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$GoldenRazzBerry, $author$project$PokeSums$SilverPinapBerry, $author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 8:
 			return _List_fromArray(
-				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$GoldenRazzBerry, $author$project$PokeSums$SilverPinapBerry, $author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 9:
 			return _List_fromArray(
-				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$GoldenRazzBerry, $author$project$PokeSums$SilverPinapBerry, $author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 10:
 			return _List_fromArray(
-				[$author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$RazzBerry]);
 		case 11:
 			return _List_fromArray(
-				[$author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		case 12:
 			return _List_fromArray(
-				[$author$project$Main$GoldenRazzBerry, $author$project$Main$SilverPinapBerry, $author$project$Main$PinapBerry, $author$project$Main$NanabBerry, $author$project$Main$RazzBerry]);
+				[$author$project$PokeSums$GoldenRazzBerry, $author$project$PokeSums$SilverPinapBerry, $author$project$PokeSums$PinapBerry, $author$project$PokeSums$NanabBerry, $author$project$PokeSums$RazzBerry]);
 		default:
 			return _List_Nil;
 	}
@@ -6124,7 +6084,7 @@ var $elm$core$Set$union = F2(
 		return $elm$core$Set$Set_elm_builtin(
 			A2($elm$core$Dict$union, dict1, dict2));
 	});
-var $author$project$Main$advance = function (model) {
+var $author$project$PokeSums$advance = function (model) {
 	var _v0 = model.exercises;
 	if (_v0.b) {
 		var nextExercise = _v0.a;
@@ -6135,10 +6095,10 @@ var $author$project$Main$advance = function (model) {
 				{
 					exercises: exercises,
 					state: A4(
-						$author$project$Main$Prompt,
+						$author$project$PokeSums$Prompt,
 						nextExercise,
 						'',
-						$author$project$Main$treeForExercise(nextExercise),
+						$author$project$PokeSums$treeForExercise(nextExercise),
 						model.time)
 				}),
 			$elm$core$Platform$Cmd$none);
@@ -6177,7 +6137,7 @@ var $author$project$Main$advance = function (model) {
 					model,
 					{
 						achievements: {fruits: model.achievements.fruits, pokeballs: pokeballs, tafels: newAchievements},
-						state: $author$project$Main$Finish
+						state: $author$project$PokeSums$Finish
 					}),
 				A3(
 					$the_sett$elm_localstorage$LocalStorage$setItem,
@@ -6204,8 +6164,8 @@ var $author$project$Main$advance = function (model) {
 					model,
 					{
 						exercises: fails,
-						report: A2($author$project$Main$Report, model.report.successes, _List_Nil),
-						state: A4($author$project$Main$Prompt, fail, '', _List_Nil, model.time)
+						report: A2($author$project$PokeSums$Report, model.report.successes, _List_Nil),
+						state: A4($author$project$PokeSums$Prompt, fail, '', _List_Nil, model.time)
 					}),
 				$elm$core$Platform$Cmd$none);
 		}
@@ -6222,7 +6182,7 @@ var $elm$core$List$append = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
-var $author$project$Main$exercisesFromTafel = F2(
+var $author$project$PokeSums$exercisesFromTafel = F2(
 	function (range, tafel) {
 		return A2(
 			$elm$core$List$map,
@@ -6231,12 +6191,12 @@ var $author$project$Main$exercisesFromTafel = F2(
 			},
 			range);
 	});
-var $author$project$Main$exercisesFromTafels = function (range) {
+var $author$project$PokeSums$exercisesFromTafels = function (range) {
 	return A2(
 		$elm$core$Basics$composeL,
 		$elm$core$List$concat,
 		$elm$core$List$map(
-			$author$project$Main$exercisesFromTafel(range)));
+			$author$project$PokeSums$exercisesFromTafel(range)));
 };
 var $elm$core$Set$insert = F2(
 	function (key, _v0) {
@@ -6658,7 +6618,7 @@ var $elm$core$Result$withDefault = F2(
 			return def;
 		}
 	});
-var $author$project$Main$update = F2(
+var $author$project$PokeSums$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'Check':
@@ -6683,12 +6643,12 @@ var $author$project$Main$update = F2(
 					case 'Load':
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					case 'Start':
-						return (!$elm$core$Set$isEmpty(model.tafels)) ? $author$project$Main$advance(
+						return (!$elm$core$Set$isEmpty(model.tafels)) ? $author$project$PokeSums$advance(
 							_Utils_update(
 								model,
 								{
 									exercises: A2(
-										$author$project$Main$exercisesFromTafels,
+										$author$project$PokeSums$exercisesFromTafels,
 										A2($elm$core$List$range, 0, 12),
 										$elm$core$Set$toList(model.tafels))
 								})) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -6729,7 +6689,7 @@ var $author$project$Main$update = F2(
 													{silverPinapBerries: fruits.silverPinapBerries + 1});
 										}
 									});
-								return $author$project$Main$advance(
+								return $author$project$PokeSums$advance(
 									_Utils_update(
 										model,
 										{
@@ -6747,7 +6707,7 @@ var $author$project$Main$update = F2(
 											}
 										}));
 							} else {
-								return $author$project$Main$advance(
+								return $author$project$PokeSums$advance(
 									_Utils_update(
 										model,
 										{
@@ -6762,14 +6722,14 @@ var $author$project$Main$update = F2(
 							}
 						}
 					case 'CheckedSuccess':
-						return $author$project$Main$advance(model);
+						return $author$project$PokeSums$advance(model);
 					case 'CheckedFail':
-						return $author$project$Main$advance(model);
+						return $author$project$PokeSums$advance(model);
 					default:
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{state: $author$project$Main$Start, tafels: $elm$core$Set$empty}),
+								{state: $author$project$PokeSums$Start, tafels: $elm$core$Set$empty}),
 							$elm$core$Platform$Cmd$none);
 				}
 			case 'Input':
@@ -6783,7 +6743,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								state: A4($author$project$Main$Prompt, p, input, t, start)
+								state: A4($author$project$PokeSums$Prompt, p, input, t, start)
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
@@ -6804,7 +6764,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								state: A4($author$project$Main$Prompt, p, i, fruits, millis),
+								state: A4($author$project$PokeSums$Prompt, p, i, fruits, millis),
 								time: millis
 							}),
 						$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
@@ -6812,7 +6772,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								state: A4(
-									$author$project$Main$Prompt,
+									$author$project$PokeSums$Prompt,
 									p,
 									i,
 									A2($elm$core$List$cons, fruit, fruits),
@@ -6839,7 +6799,7 @@ var $author$project$Main$update = F2(
 							$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
 						var fruitsDecoder = A6(
 							$elm$json$Json$Decode$map5,
-							$author$project$Main$FruitBag,
+							$author$project$PokeSums$FruitBag,
 							A2($elm$json$Json$Decode$field, 'RazzBerries', $elm$json$Json$Decode$int),
 							A2($elm$json$Json$Decode$field, 'NanabBerries', $elm$json$Json$Decode$int),
 							A2($elm$json$Json$Decode$field, 'PinapBerries', $elm$json$Json$Decode$int),
@@ -6847,7 +6807,7 @@ var $author$project$Main$update = F2(
 							A2($elm$json$Json$Decode$field, 'SilverPinapBerries', $elm$json$Json$Decode$int));
 						var achievementsDecoder = A4(
 							$elm$json$Json$Decode$map3,
-							$author$project$Main$Achievements,
+							$author$project$PokeSums$Achievements,
 							A2($elm$json$Json$Decode$field, 'tafels', tafelsDecoder),
 							A2($elm$json$Json$Decode$field, 'pokeballs', $elm$json$Json$Decode$int),
 							A2($elm$json$Json$Decode$field, 'fruits', fruitsDecoder));
@@ -6858,70 +6818,56 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{achievements: achievements, state: $author$project$Main$Start}),
+								{achievements: achievements, state: $author$project$PokeSums$Start}),
 							$elm$core$Platform$Cmd$none);
 					case 'ItemNotFound':
 						var key = res.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{state: $author$project$Main$Start}),
+								{state: $author$project$PokeSums$Start}),
 							$elm$core$Platform$Cmd$none);
 					case 'KeyList':
 						var keys = res.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{state: $author$project$Main$Start}),
+								{state: $author$project$PokeSums$Start}),
 							$elm$core$Platform$Cmd$none);
 					default:
 						var errMsg = res.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{state: $author$project$Main$Start}),
+								{state: $author$project$PokeSums$Start}),
 							$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
-var $author$project$Main$Check = function (a) {
-	return {$: 'Check', a: a};
-};
-var $author$project$Main$Input = function (a) {
-	return {$: 'Input', a: a};
-};
-var $author$project$Main$NoCheck = function (a) {
-	return {$: 'NoCheck', a: a};
-};
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		if (model.$ === 'Menu') {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		} else {
+			var pokesums = model.a;
+			if (msg.$ === 'PokeSumsMsg') {
+				var m = msg.a;
+				var _v2 = A2($author$project$PokeSums$update, m, pokesums);
+				var pokesumsModel = _v2.a;
+				var pokesumsCmd = _v2.b;
+				return _Utils_Tuple2(
+					$author$project$Main$PokeSums(pokesumsModel),
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$PokeSumsMsg, pokesumsCmd));
+			} else {
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			}
+		}
 	});
-var $elm$html$Html$Attributes$autofocus = $elm$html$Html$Attributes$boolProperty('autofocus');
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Main$fruitImage = function (fruit) {
-	switch (fruit.$) {
-		case 'RazzBerry':
-			return 'GO_Razz_Berry.png';
-		case 'NanabBerry':
-			return 'GO_Nanab_Berry.png';
-		case 'PinapBerry':
-			return 'GO_Pinap_Berry.png';
-		case 'GoldenRazzBerry':
-			return 'GO_Golden_Razz_Berry.png';
-		default:
-			return 'GO_Silver_Pinap_Berry.png';
-	}
-};
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$input = _VirtualDom_node('input');
+var $author$project$Main$SelectPokeSums = {$: 'SelectPokeSums'};
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6939,6 +6885,47 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$PokeSums$Check = function (a) {
+	return {$: 'Check', a: a};
+};
+var $author$project$PokeSums$Input = function (a) {
+	return {$: 'Input', a: a};
+};
+var $author$project$PokeSums$NoCheck = function (a) {
+	return {$: 'NoCheck', a: a};
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$autofocus = $elm$html$Html$Attributes$boolProperty('autofocus');
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $author$project$PokeSums$fruitImage = function (fruit) {
+	switch (fruit.$) {
+		case 'RazzBerry':
+			return 'GO_Razz_Berry.png';
+		case 'NanabBerry':
+			return 'GO_Nanab_Berry.png';
+		case 'PinapBerry':
+			return 'GO_Pinap_Berry.png';
+		case 'GoldenRazzBerry':
+			return 'GO_Golden_Razz_Berry.png';
+		default:
+			return 'GO_Silver_Pinap_Berry.png';
+	}
+};
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -6971,6 +6958,7 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6989,12 +6977,10 @@ var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$td = _VirtualDom_node('td');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Main$viewFruit = function (_v0) {
+var $author$project$PokeSums$viewFruit = function (_v0) {
 	var x = _v0.a;
 	var y = _v0.b;
 	var fruit = _v0.c;
@@ -7003,7 +6989,7 @@ var $author$project$Main$viewFruit = function (_v0) {
 		_List_fromArray(
 			[
 				$elm$html$Html$Attributes$src(
-				$author$project$Main$fruitImage(fruit)),
+				$author$project$PokeSums$fruitImage(fruit)),
 				A2($elm$html$Html$Attributes$style, 'height', '7vh'),
 				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
 				A2(
@@ -7019,7 +7005,7 @@ var $author$project$Main$viewFruit = function (_v0) {
 			]),
 		_List_Nil);
 };
-var $author$project$Main$viewTree = function (tree) {
+var $author$project$PokeSums$viewTree = function (tree) {
 	var prand = function (seed) {
 		return A2($elm$core$Debug$log, 'rand', (3.95 * seed) * (1.0 - seed));
 	};
@@ -7062,343 +7048,381 @@ var $author$project$Main$viewTree = function (tree) {
 						A2($elm$html$Html$Attributes$style, 'height', '50vh')
 					]),
 				_List_Nil),
-			A2($elm$core$List$map, $author$project$Main$viewFruit, coords)));
+			A2($elm$core$List$map, $author$project$PokeSums$viewFruit, coords)));
+};
+var $author$project$PokeSums$view = function (model) {
+	var _v0 = model.state;
+	switch (_v0.$) {
+		case 'Load':
+			return A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Momentje..')
+					]));
+		case 'Start':
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Klaar voor de start? Welke tafels wil je doen?')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$table,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'width', '100%')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$td,
+												_List_fromArray(
+													[
+														A2($elm$html$Html$Attributes$style, 'vertical-align', 'top'),
+														A2($elm$html$Html$Attributes$style, 'width', '5em')
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$elm$html$Html$table,
+														_List_Nil,
+														A2(
+															$elm$core$List$map,
+															function (tafel) {
+																return A2(
+																	$elm$html$Html$tr,
+																	_List_Nil,
+																	_List_fromArray(
+																		[
+																			A2(
+																			$elm$html$Html$td,
+																			_List_Nil,
+																			_List_fromArray(
+																				[
+																					A2(
+																					$elm$html$Html$input,
+																					_List_fromArray(
+																						[
+																							$elm$html$Html$Attributes$type_('checkbox'),
+																							$elm$html$Html$Events$onClick(
+																							A2($elm$core$Set$member, tafel, model.achievements.tafels) ? $author$project$PokeSums$NoCheck(tafel) : $author$project$PokeSums$Check(tafel)),
+																							$elm$html$Html$Attributes$checked(
+																							A2($elm$core$Set$member, tafel, model.tafels) || A2($elm$core$Set$member, tafel, model.achievements.tafels)),
+																							$elm$html$Html$Attributes$disabled(
+																							A2($elm$core$Set$member, tafel, model.achievements.tafels))
+																						]),
+																					_List_Nil)
+																				])),
+																			A2(
+																			$elm$html$Html$td,
+																			_List_Nil,
+																			_List_fromArray(
+																				[
+																					$elm$html$Html$text(
+																					$elm$core$String$fromInt(tafel))
+																				]))
+																		]));
+															},
+															A2($elm$core$List$range, 0, 12)))
+													])),
+												A2(
+												$elm$html$Html$td,
+												_List_fromArray(
+													[
+														A2($elm$html$Html$Attributes$style, 'width', '60vw'),
+														A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+													]),
+												A2(
+													$elm$core$List$map,
+													function (_v1) {
+														var fruitFun = _v1.a;
+														var fruit = _v1.b;
+														return A2(
+															$elm$html$Html$div,
+															_List_fromArray(
+																[
+																	A2($elm$html$Html$Attributes$style, 'text-align', 'left')
+																]),
+															_List_fromArray(
+																[
+																	A2(
+																	$elm$html$Html$img,
+																	_List_fromArray(
+																		[
+																			$elm$html$Html$Attributes$src(
+																			$author$project$PokeSums$fruitImage(fruit)),
+																			A2($elm$html$Html$Attributes$style, 'height', '10vh')
+																		]),
+																	_List_Nil),
+																	$elm$html$Html$text(
+																	$elm$core$String$fromInt(
+																		fruitFun(model.achievements.fruits)))
+																]));
+													},
+													_List_fromArray(
+														[
+															_Utils_Tuple2(
+															function ($) {
+																return $.goldenRazzBerries;
+															},
+															$author$project$PokeSums$GoldenRazzBerry),
+															_Utils_Tuple2(
+															function ($) {
+																return $.silverPinapBerries;
+															},
+															$author$project$PokeSums$SilverPinapBerry),
+															_Utils_Tuple2(
+															function ($) {
+																return $.pinapBerries;
+															},
+															$author$project$PokeSums$PinapBerry),
+															_Utils_Tuple2(
+															function ($) {
+																return $.nanabBerries;
+															},
+															$author$project$PokeSums$NanabBerry),
+															_Utils_Tuple2(
+															function ($) {
+																return $.razzBerries;
+															},
+															$author$project$PokeSums$RazzBerry)
+														]))),
+												A2(
+												$elm$html$Html$td,
+												_List_fromArray(
+													[
+														A2($elm$html$Html$Attributes$style, 'text-align', 'right'),
+														A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
+													]),
+												A2(
+													$elm$core$List$map,
+													function (_v2) {
+														return A2(
+															$elm$html$Html$img,
+															_List_fromArray(
+																[
+																	$elm$html$Html$Attributes$src('pokeball.png'),
+																	A2($elm$html$Html$Attributes$style, 'padding', '0.5em')
+																]),
+															_List_Nil);
+													},
+													A2($elm$core$List$range, 1, model.achievements.pokeballs)))
+											]))
+									]))
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$PokeSums$Next)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Start!')
+									]))
+							]))
+					]));
+		case 'Finish':
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Hoera, alle sommen goed!')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$img,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$src('https://lorempokemon.fakerapi.it/pokemon')
+									]),
+								_List_Nil)
+							]))
+					]));
+		case 'Prompt':
+			var _v3 = _v0.a;
+			var n1 = _v3.a;
+			var n2 = _v3.b;
+			var input = _v0.b;
+			var tree = _v0.c;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								'Hoeveel is ' + ($elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + '?'))))
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onInput($author$project$PokeSums$Input),
+										$elm$html$Html$Attributes$autofocus(true),
+										$elm$html$Html$Attributes$pattern('\\d*'),
+										$elm$html$Html$Attributes$value(input)
+									]),
+								_List_Nil)
+							])),
+						$author$project$PokeSums$viewTree(tree)
+					]));
+		case 'CheckedSuccess':
+			var _v4 = _v0.a;
+			var n1 = _v4.a;
+			var n2 = _v4.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + (' is inderdaad ' + ($elm$core$String$fromInt(n1 * n2) + '!')))))
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$PokeSums$Next)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Volgende!')
+									]))
+							]))
+					]));
+		default:
+			var _v5 = _v0.a;
+			var n1 = _v5.a;
+			var n2 = _v5.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								'Helaas, dat is niet goed. ' + ($elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + (' = ' + ($elm$core$String$fromInt(n1 * n2) + '!'))))))
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$PokeSums$Next)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Volgende!')
+									]))
+							]))
+					]));
+	}
 };
 var $author$project$Main$view = function (model) {
-	var html = function () {
-		var _v0 = model.state;
-		switch (_v0.$) {
-			case 'Load':
-				return A2(
-					$elm$html$Html$p,
+	if (model.$ === 'Menu') {
+		return {
+			body: _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
 					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Momentje..')
-						]));
-			case 'Start':
-				return A2(
-					$elm$html$Html$div,
+							$elm$html$Html$text('Tafels')
+						])),
+					A2(
+					$elm$html$Html$ul,
 					_List_Nil,
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$p,
-							_List_Nil,
+							$elm$html$Html$li,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Klaar voor de start? Welke tafels wil je doen?')
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
+									$elm$html$Html$Events$onClick($author$project$Main$SelectPokeSums)
+								]),
 							_List_fromArray(
 								[
-									A2(
-									$elm$html$Html$table,
-									_List_fromArray(
-										[
-											A2($elm$html$Html$Attributes$style, 'width', '100%')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$tr,
-											_List_Nil,
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$td,
-													_List_fromArray(
-														[
-															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top'),
-															A2($elm$html$Html$Attributes$style, 'width', '5em')
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$elm$html$Html$table,
-															_List_Nil,
-															A2(
-																$elm$core$List$map,
-																function (tafel) {
-																	return A2(
-																		$elm$html$Html$tr,
-																		_List_Nil,
-																		_List_fromArray(
-																			[
-																				A2(
-																				$elm$html$Html$td,
-																				_List_Nil,
-																				_List_fromArray(
-																					[
-																						A2(
-																						$elm$html$Html$input,
-																						_List_fromArray(
-																							[
-																								$elm$html$Html$Attributes$type_('checkbox'),
-																								$elm$html$Html$Events$onClick(
-																								A2($elm$core$Set$member, tafel, model.achievements.tafels) ? $author$project$Main$NoCheck(tafel) : $author$project$Main$Check(tafel)),
-																								$elm$html$Html$Attributes$checked(
-																								A2($elm$core$Set$member, tafel, model.tafels) || A2($elm$core$Set$member, tafel, model.achievements.tafels)),
-																								$elm$html$Html$Attributes$disabled(
-																								A2($elm$core$Set$member, tafel, model.achievements.tafels))
-																							]),
-																						_List_Nil)
-																					])),
-																				A2(
-																				$elm$html$Html$td,
-																				_List_Nil,
-																				_List_fromArray(
-																					[
-																						$elm$html$Html$text(
-																						$elm$core$String$fromInt(tafel))
-																					]))
-																			]));
-																},
-																A2($elm$core$List$range, 0, 12)))
-														])),
-													A2(
-													$elm$html$Html$td,
-													_List_fromArray(
-														[
-															A2($elm$html$Html$Attributes$style, 'width', '60vw'),
-															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
-														]),
-													A2(
-														$elm$core$List$map,
-														function (_v1) {
-															var fruitFun = _v1.a;
-															var fruit = _v1.b;
-															return A2(
-																$elm$html$Html$div,
-																_List_fromArray(
-																	[
-																		A2($elm$html$Html$Attributes$style, 'text-align', 'left')
-																	]),
-																_List_fromArray(
-																	[
-																		A2(
-																		$elm$html$Html$img,
-																		_List_fromArray(
-																			[
-																				$elm$html$Html$Attributes$src(
-																				$author$project$Main$fruitImage(fruit)),
-																				A2($elm$html$Html$Attributes$style, 'height', '10vh')
-																			]),
-																		_List_Nil),
-																		$elm$html$Html$text(
-																		$elm$core$String$fromInt(
-																			fruitFun(model.achievements.fruits)))
-																	]));
-														},
-														_List_fromArray(
-															[
-																_Utils_Tuple2(
-																function ($) {
-																	return $.goldenRazzBerries;
-																},
-																$author$project$Main$GoldenRazzBerry),
-																_Utils_Tuple2(
-																function ($) {
-																	return $.silverPinapBerries;
-																},
-																$author$project$Main$SilverPinapBerry),
-																_Utils_Tuple2(
-																function ($) {
-																	return $.pinapBerries;
-																},
-																$author$project$Main$PinapBerry),
-																_Utils_Tuple2(
-																function ($) {
-																	return $.nanabBerries;
-																},
-																$author$project$Main$NanabBerry),
-																_Utils_Tuple2(
-																function ($) {
-																	return $.razzBerries;
-																},
-																$author$project$Main$RazzBerry)
-															]))),
-													A2(
-													$elm$html$Html$td,
-													_List_fromArray(
-														[
-															A2($elm$html$Html$Attributes$style, 'text-align', 'right'),
-															A2($elm$html$Html$Attributes$style, 'vertical-align', 'top')
-														]),
-													A2(
-														$elm$core$List$map,
-														function (_v2) {
-															return A2(
-																$elm$html$Html$img,
-																_List_fromArray(
-																	[
-																		$elm$html$Html$Attributes$src('pokeball.png'),
-																		A2($elm$html$Html$Attributes$style, 'padding', '0.5em')
-																	]),
-																_List_Nil);
-														},
-														A2($elm$core$List$range, 1, model.achievements.pokeballs)))
-												]))
-										]))
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
-											$elm$html$Html$Events$onClick($author$project$Main$Next)
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text('Start!')
-										]))
+									$elm$html$Html$text('PokeSommen')
 								]))
-						]));
-			case 'Finish':
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Hoera, alle sommen goed!')
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$img,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$src('https://lorempokemon.fakerapi.it/pokemon')
-										]),
-									_List_Nil)
-								]))
-						]));
-			case 'Prompt':
-				var _v3 = _v0.a;
-				var n1 = _v3.a;
-				var n2 = _v3.b;
-				var input = _v0.b;
-				var tree = _v0.c;
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(
-									'Hoeveel is ' + ($elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + '?'))))
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$input,
-									_List_fromArray(
-										[
-											$elm$html$Html$Events$onInput($author$project$Main$Input),
-											$elm$html$Html$Attributes$autofocus(true),
-											$elm$html$Html$Attributes$pattern('\\d*'),
-											$elm$html$Html$Attributes$value(input)
-										]),
-									_List_Nil)
-								])),
-							$author$project$Main$viewTree(tree)
-						]));
-			case 'CheckedSuccess':
-				var _v4 = _v0.a;
-				var n1 = _v4.a;
-				var n2 = _v4.b;
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(
-									$elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + (' is inderdaad ' + ($elm$core$String$fromInt(n1 * n2) + '!')))))
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
-											$elm$html$Html$Events$onClick($author$project$Main$Next)
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text('Volgende!')
-										]))
-								]))
-						]));
-			default:
-				var _v5 = _v0.a;
-				var n1 = _v5.a;
-				var n2 = _v5.b;
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(
-									'Helaas, dat is niet goed. ' + ($elm$core$String$fromInt(n1) + (' x ' + ($elm$core$String$fromInt(n2) + (' = ' + ($elm$core$String$fromInt(n1 * n2) + '!'))))))
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
-											$elm$html$Html$Events$onClick($author$project$Main$Next)
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text('Volgende!')
-										]))
-								]))
-						]));
-		}
-	}();
-	return {
-		body: _List_fromArray(
-			[html]),
-		title: 'Sommen'
-	};
+						]))
+				]),
+			title: 'Spellen met tafels'
+		};
+	} else {
+		var pokesums = model.a;
+		return {
+			body: _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$map,
+					$author$project$Main$PokeSumsMsg,
+					$author$project$PokeSums$view(pokesums))
+				]),
+			title: 'PokeSommen'
+		};
+	}
 };
 var $author$project$Main$main = $elm$browser$Browser$document(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
