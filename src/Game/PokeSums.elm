@@ -1,4 +1,4 @@
-module PokeSums exposing (Model, Msg, init, subscriptions, update, view)
+module Game.PokeSums exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser
 import Browser.Events exposing (onKeyDown)
