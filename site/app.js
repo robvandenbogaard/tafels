@@ -6104,6 +6104,7 @@ var $author$project$Game$ShootOut$init = function () {
 			exercises: _List_Nil,
 			factors: _List_fromArray(
 				[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20, 25]),
+			sounds: _List_Nil,
 			state: $author$project$Game$ShootOut$Load,
 			storage: storage,
 			time: 0
@@ -6997,7 +6998,7 @@ var $author$project$Game$ShootOut$advance = function (model) {
 	if (_v0.b) {
 		var nextExercise = _v0.a;
 		var exercises = _v0.b;
-		var budget = 2000 + (750 * $elm$core$List$length(nextExercise.factors));
+		var budget = 2500 + (750 * $elm$core$List$length(nextExercise.factors));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
@@ -7034,6 +7035,10 @@ var $author$project$Game$ShootOut$advance = function (model) {
 						]))));
 	}
 };
+var $author$project$Game$ShootOut$correctAnswer = F2(
+	function (factor, outcome) {
+		return !(outcome % factor);
+	});
 var $author$project$Game$ShootOut$Exercise = F2(
 	function (outcome, factors) {
 		return {factors: factors, outcome: outcome};
@@ -7109,6 +7114,17 @@ var $author$project$Game$ShootOut$exercisesFromTafels = F2(
 					$elm$core$Dict$empty,
 					tafels)));
 	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Game$ShootOut$update = F2(
 	function (msg, model) {
@@ -7126,7 +7142,8 @@ var $author$project$Game$ShootOut$update = F2(
 									exercises: A2(
 										$author$project$Game$ShootOut$exercisesFromTafels,
 										model.factors,
-										A2($elm$core$List$range, 2, 12))
+										A2($elm$core$List$range, 2, 12)),
+									sounds: _List_Nil
 								}));
 					case 'Prompt':
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -7147,20 +7164,31 @@ var $author$project$Game$ShootOut$update = F2(
 					var budget = _v2.b;
 					var exercise = _v2.c.exercise;
 					var answers = _v2.c.answers;
-					var attempt = A2(
-						$author$project$Game$ShootOut$Answer,
-						exercise,
-						A2(
+					if (_Utils_cmp(model.time - start, budget) < 0) {
+						var sounds = A2(
 							$elm$core$List$cons,
-							{factor: i, time: model.time - start},
-							answers));
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								state: A3($author$project$Game$ShootOut$Prompt, start, budget, attempt)
-							}),
-						$elm$core$Platform$Cmd$none);
+							_Utils_Tuple2(
+								model.time,
+								A2($author$project$Game$ShootOut$correctAnswer, i, exercise.outcome)),
+							model.sounds);
+						var attempt = A2(
+							$author$project$Game$ShootOut$Answer,
+							exercise,
+							A2(
+								$elm$core$List$cons,
+								{factor: i, time: model.time - start},
+								answers));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									sounds: sounds,
+									state: A3($author$project$Game$ShootOut$Prompt, start, budget, attempt)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -7172,10 +7200,17 @@ var $author$project$Game$ShootOut$update = F2(
 					var start = _v3.a;
 					var budget = _v3.b;
 					var answer = _v3.c;
+					var removeAfterDecay = $elm$core$List$filter(
+						function (_v4) {
+							var t = _v4.a;
+							return (model.time - t) < 3000;
+						});
+					var sounds = removeAfterDecay(model.sounds);
 					return (_Utils_cmp(millis - start, budget) > 0) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
+								sounds: sounds,
 								state: $author$project$Game$ShootOut$Reveal(answer),
 								time: millis
 							}),
@@ -7881,6 +7916,7 @@ var $elm$core$List$member = F2(
 			},
 			xs);
 	});
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Game$ShootOut$viewAnswer = F4(
 	function (outcome, guesses, factors, factor) {
 		var styleHit = function (color) {
@@ -7902,6 +7938,7 @@ var $author$project$Game$ShootOut$viewAnswer = F4(
 		var styleBase = _List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+				A2($elm$html$Html$Attributes$style, 'height', '9rem'),
 				A2($elm$html$Html$Attributes$style, 'width', '4rem'),
 				A2($elm$html$Html$Attributes$style, 'margin', '0.5rem')
 			]);
@@ -7920,7 +7957,7 @@ var $author$project$Game$ShootOut$viewAnswer = F4(
 							$elm$html$Html$text(
 							$elm$core$String$fromInt(factor))
 						]))
-				])) : ((!(outcome % factor)) ? A2(
+				])) : (A2($author$project$Game$ShootOut$correctAnswer, factor, outcome) ? A2(
 			$elm$html$Html$div,
 			_Utils_ap(
 				styleBase,
@@ -7934,7 +7971,18 @@ var $author$project$Game$ShootOut$viewAnswer = F4(
 					_List_fromArray(
 						[
 							$elm$html$Html$text(
-							$elm$core$String$fromInt(factor))
+							$elm$core$String$fromInt(factor)),
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									A2($elm$html$Html$Attributes$style, 'font-size', '3vh')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(
+									'x' + $elm$core$String$fromInt((outcome / factor) | 0))
+								]))
 						]))
 				])) : A2(
 			$elm$html$Html$div,
@@ -7972,169 +8020,281 @@ var $author$project$Game$ShootOut$viewAnswers = F2(
 var $author$project$Game$ShootOut$Selected = function (a) {
 	return {$: 'Selected', a: a};
 };
-var $author$project$Game$ShootOut$viewFactor = F2(
-	function (guesses, factor) {
-		return A2(
+var $author$project$Game$ShootOut$viewFactor = F3(
+	function (outcome, guesses, factor) {
+		var styleFactor = _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+				A2($elm$html$Html$Attributes$style, 'bottom', '0'),
+				A2($elm$html$Html$Attributes$style, 'left', '0'),
+				A2($elm$html$Html$Attributes$style, 'right', '0'),
+				A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
+				A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
+				A2($elm$html$Html$Attributes$style, 'font-size', '5vh')
+			]);
+		var styleBase = _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+				A2($elm$html$Html$Attributes$style, 'height', '9rem'),
+				A2($elm$html$Html$Attributes$style, 'width', '4rem'),
+				A2($elm$html$Html$Attributes$style, 'margin', '0.5rem')
+			]);
+		var shadow = A2($elm$html$Html$Attributes$style, 'box-shadow', 'gray 0 1px 3px');
+		return A2($elm$core$List$member, factor, guesses) ? A2(
 			$elm$html$Html$div,
+			styleBase,
+			_Utils_eq(outcome, factor) ? _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					A2($elm$core$List$cons, shadow, styleFactor),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(factor))
+						]))
+				]) : (A2($author$project$Game$ShootOut$correctAnswer, factor, outcome) ? _List_fromArray(
+				[
+					$author$project$Game$ShootOut$Droid$drawing,
+					A2(
+					$elm$html$Html$div,
+					styleFactor,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(factor)),
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									A2($elm$html$Html$Attributes$style, 'font-size', '3vh')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(
+									'x' + $elm$core$String$fromInt((outcome / factor) | 0))
+								]))
+						]))
+				]) : _List_fromArray(
+				[
+					$author$project$Game$ShootOut$Clone$drawing,
+					A2(
+					$elm$html$Html$div,
+					styleFactor,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(factor))
+						]))
+				]))) : A2(
+			$elm$html$Html$div,
+			A2(
+				$elm$core$List$cons,
+				$elm$html$Html$Events$onClick(
+					$author$project$Game$ShootOut$Selected(factor)),
+				A2($elm$core$List$cons, shadow, styleBase)),
 			_List_fromArray(
 				[
-					A2($elm$html$Html$Attributes$style, 'box-shadow', 'gray 0 2px 3px'),
-					A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-					A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
-					A2($elm$html$Html$Attributes$style, 'font-size', '5vh'),
-					A2($elm$html$Html$Attributes$style, 'width', '2rem'),
-					A2($elm$html$Html$Attributes$style, 'margin', '0.5rem'),
-					A2($elm$html$Html$Attributes$style, 'padding', '1rem'),
-					$elm$html$Html$Events$onClick(
-					$author$project$Game$ShootOut$Selected(factor))
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(
-					A2($elm$core$List$member, factor, guesses) ? '' : $elm$core$String$fromInt(factor))
+					A2(
+					$elm$html$Html$div,
+					A2(
+						$elm$core$List$cons,
+						A2($elm$html$Html$Attributes$style, 'top', '30%'),
+						styleFactor),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(factor))
+						]))
 				]));
 	});
 var $author$project$Game$ShootOut$viewFactors = F2(
-	function (guesses, factors) {
+	function (_v0, factors) {
+		var exercise = _v0.exercise;
+		var answers = _v0.answers;
 		return A2(
 			$elm$core$List$map,
-			$author$project$Game$ShootOut$viewFactor(
+			A2(
+				$author$project$Game$ShootOut$viewFactor,
+				exercise.outcome,
 				A2(
 					$elm$core$List$map,
 					function ($) {
 						return $.factor;
 					},
-					guesses)),
+					answers)),
 			factors);
 	});
+var $elm$html$Html$audio = _VirtualDom_node('audio');
+var $elm$html$Html$Attributes$autoplay = $elm$html$Html$Attributes$boolProperty('autoplay');
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Game$ShootOut$viewSounds = $elm$core$List$indexedMap(
+	F2(
+		function (i, _v0) {
+			var t = _v0.a;
+			var correct = _v0.b;
+			var _v1 = function () {
+				if (correct) {
+					return _Utils_Tuple2('clone-shot-', 5);
+				} else {
+					return _Utils_Tuple2('aargh-', 3);
+				}
+			}();
+			var prefix = _v1.a;
+			var max = _v1.b;
+			return A2(
+				$elm$html$Html$audio,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$autoplay(true),
+						$elm$html$Html$Attributes$src(
+						prefix + ($elm$core$String$fromInt(
+							A2($elm$core$Basics$modBy, max, i) + 1) + '.mp3'))
+					]),
+				_List_Nil);
+		}));
 var $author$project$Game$ShootOut$view = function (model) {
-	var _v0 = model.state;
-	switch (_v0.$) {
-		case 'Load':
-			return A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		$elm$core$List$concat(
+			_List_fromArray(
+				[
+					$author$project$Game$ShootOut$viewSounds(model.sounds),
+					_List_fromArray(
 					[
-						$elm$html$Html$text('Momentje..')
-					]));
-		case 'Start':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Klaar voor de start?')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Game$ShootOut$Next)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Start!')
-									]))
-							]))
-					]));
-		case 'Finish':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Hoera, alle sommen goed!')
-							]))
-					]));
-		case 'Prompt':
-			var input = _v0.a;
-			var exercise = _v0.c.exercise;
-			var answers = _v0.c.answers;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								'Uit welke tafel(s) komt ' + ($elm$core$String$fromInt(exercise.outcome) + '?'))
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-								A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
-								A2($elm$html$Html$Attributes$style, 'flex-wrap', 'wrap'),
-								A2($elm$html$Html$Attributes$style, 'justify-content', 'space-evenly')
-							]),
-						A2($author$project$Game$ShootOut$viewFactors, answers, model.factors))
-					]));
-		default:
-			var attempt = _v0.a;
-			var exercise = attempt.exercise;
-			var answers = attempt.answers;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								'Uit welke tafel(s) komt ' + ($elm$core$String$fromInt(exercise.outcome) + '?'))
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_fromArray(
-							[
-								A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-								A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
-								A2($elm$html$Html$Attributes$style, 'flex-wrap', 'wrap'),
-								A2($elm$html$Html$Attributes$style, 'justify-content', 'space-evenly')
-							]),
-						A2($author$project$Game$ShootOut$viewAnswers, attempt, model.factors)),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Game$ShootOut$Next)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Volgende!')
-									]))
-							]))
-					]));
-	}
+						function () {
+						var _v0 = model.state;
+						switch (_v0.$) {
+							case 'Load':
+								return A2(
+									$elm$html$Html$p,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Momentje..')
+										]));
+							case 'Start':
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Klaar voor de start?')
+												])),
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$button,
+													_List_fromArray(
+														[
+															$elm$html$Html$Events$onClick($author$project$Game$ShootOut$Next)
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('Start!')
+														]))
+												]))
+										]));
+							case 'Finish':
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Hoera, alle sommen goed!')
+												]))
+										]));
+							case 'Prompt':
+								var input = _v0.a;
+								var attempt = _v0.c;
+								var exercise = attempt.exercise;
+								var answers = attempt.answers;
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text(
+													'Uit welke tafel(s) komt ' + ($elm$core$String$fromInt(exercise.outcome) + '?'))
+												])),
+											A2(
+											$elm$html$Html$p,
+											_List_fromArray(
+												[
+													A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+													A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+													A2($elm$html$Html$Attributes$style, 'flex-wrap', 'wrap'),
+													A2($elm$html$Html$Attributes$style, 'justify-content', 'space-evenly')
+												]),
+											A2($author$project$Game$ShootOut$viewFactors, attempt, model.factors))
+										]));
+							default:
+								var attempt = _v0.a;
+								var exercise = attempt.exercise;
+								var answers = attempt.answers;
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text(
+													'Uit welke tafel(s) komt ' + ($elm$core$String$fromInt(exercise.outcome) + '?'))
+												])),
+											A2(
+											$elm$html$Html$p,
+											_List_fromArray(
+												[
+													A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+													A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+													A2($elm$html$Html$Attributes$style, 'flex-wrap', 'wrap'),
+													A2($elm$html$Html$Attributes$style, 'justify-content', 'space-evenly')
+												]),
+											A2($author$project$Game$ShootOut$viewAnswers, attempt, model.factors)),
+											A2(
+											$elm$html$Html$p,
+											_List_Nil,
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$button,
+													_List_fromArray(
+														[
+															$elm$html$Html$Events$onClick($author$project$Game$ShootOut$Next)
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('Volgende!')
+														]))
+												]))
+										]));
+						}
+					}()
+					])
+				])));
 };
 var $author$project$Main$view = function (model) {
 	switch (model.$) {

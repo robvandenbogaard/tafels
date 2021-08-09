@@ -8,6 +8,8 @@ import Game.ShootOut.Droid as Droid
 import Html
 import Html.Attributes as Html
 import Html.Events as Html
+import Html.Keyed
+import Html.Lazy
 import Json.Decode as Decode
 import Json.Encode as Encode
 import LocalStorage exposing (LocalStorage)
@@ -23,6 +25,7 @@ type alias Model =
     , storage : LocalStorage Msg
     , time : Int
     , factors : List Int
+    , sounds : List ( Int, Bool )
     }
 
 
@@ -95,6 +98,7 @@ init =
       , state = Load
       , storage = storage
       , time = 0
+      , sounds = []
       }
     , LocalStorage.getItem storage "achievements"
     )
@@ -123,6 +127,7 @@ update msg model =
                     advance
                         { model
                             | exercises = exercisesFromTafels model.factors (List.range 2 12)
+                            , sounds = []
                         }
 
                 Prompt _ _ _ ->
@@ -137,11 +142,18 @@ update msg model =
         Selected i ->
             case model.state of
                 Prompt start budget { exercise, answers } ->
-                    let
-                        attempt =
-                            Answer exercise ({ factor = i, time = model.time - start } :: answers)
-                    in
-                    ( { model | state = Prompt start budget attempt }, Cmd.none )
+                    if model.time - start < budget then
+                        let
+                            attempt =
+                                Answer exercise ({ factor = i, time = model.time - start } :: answers)
+
+                            sounds =
+                                ( model.time, correctAnswer i exercise.outcome ) :: model.sounds
+                        in
+                        ( { model | sounds = sounds, state = Prompt start budget attempt }, Cmd.none )
+
+                    else
+                        ( model, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -153,8 +165,16 @@ update msg model =
             in
             case model.state of
                 Prompt start budget answer ->
+                    let
+                        removeAfterDecay =
+                            List.filter (\( t, _ ) -> (model.time - t) < 3000)
+
+                        sounds =
+                            removeAfterDecay model.sounds
+                    in
                     if millis - start > budget then
-                        ( { model | time = millis, state = Reveal answer }, Cmd.none )
+                        -- && sounds == [] then
+                        ( { model | time = millis, sounds = sounds, state = Reveal answer }, Cmd.none )
 
                     else
                         ( { model | time = millis }, Cmd.none )
@@ -194,7 +214,7 @@ advance model =
         nextExercise :: exercises ->
             let
                 budget =
-                    2000 + 750 * List.length nextExercise.factors
+                    2500 + 750 * List.length nextExercise.factors
             in
             ( { model
                 | exercises = exercises
@@ -216,84 +236,153 @@ advance model =
             )
 
 
+viewSounds =
+    List.indexedMap
+        (\i ( t, correct ) ->
+            let
+                ( prefix, max ) =
+                    case correct of
+                        True ->
+                            ( "clone-shot-", 5 )
+
+                        False ->
+                            ( "aargh-", 3 )
+            in
+            Html.audio [ Html.autoplay True, Html.src <| prefix ++ String.fromInt (modBy max i + 1) ++ ".mp3" ] []
+        )
+
+
 view model =
-    case model.state of
-        Load ->
-            Html.p [] [ Html.text "Momentje.." ]
+    Html.div [] <|
+        List.concat
+            [ viewSounds model.sounds
+            , [ case model.state of
+                    Load ->
+                        Html.p [] [ Html.text "Momentje.." ]
 
-        Start ->
-            Html.div []
-                [ Html.p []
-                    [ Html.text <| "Klaar voor de start?"
-                    ]
-                , Html.p []
-                    [ Html.button [ Html.onClick Next ] [ Html.text "Start!" ]
+                    Start ->
+                        Html.div []
+                            [ Html.p []
+                                [ Html.text <| "Klaar voor de start?"
+                                ]
+                            , Html.p []
+                                [ Html.button [ Html.onClick Next ] [ Html.text "Start!" ]
+                                ]
+                            ]
+
+                    Finish ->
+                        Html.div []
+                            [ Html.p []
+                                [ Html.text "Hoera, alle sommen goed!" ]
+                            ]
+
+                    Prompt input _ ({ exercise, answers } as attempt) ->
+                        Html.div []
+                            [ Html.p []
+                                [ Html.text <|
+                                    "Uit welke tafel(s) komt "
+                                        ++ String.fromInt exercise.outcome
+                                        ++ "?"
+                                ]
+                            , Html.p
+                                [ Html.style "display" "flex"
+                                , Html.style "flex-direction" "row"
+                                , Html.style "flex-wrap" "wrap"
+                                , Html.style "justify-content" "space-evenly"
+                                ]
+                              <|
+                                viewFactors attempt model.factors
+                            ]
+
+                    Reveal ({ exercise, answers } as attempt) ->
+                        Html.div []
+                            [ Html.p [] [ Html.text <| "Uit welke tafel(s) komt " ++ String.fromInt exercise.outcome ++ "?" ]
+                            , Html.p
+                                [ Html.style "display" "flex"
+                                , Html.style "flex-direction" "row"
+                                , Html.style "flex-wrap" "wrap"
+                                , Html.style "justify-content" "space-evenly"
+                                ]
+                              <|
+                                viewAnswers attempt model.factors
+                            , Html.p []
+                                [ Html.button [ Html.onClick Next ] [ Html.text "Volgende!" ]
+                                ]
+                            ]
+              ]
+            ]
+
+
+correctAnswer factor outcome =
+    remainderBy factor outcome == 0
+
+
+viewFactors { exercise, answers } factors =
+    List.map (viewFactor exercise.outcome (List.map .factor answers)) factors
+
+
+viewFactor outcome guesses factor =
+    let
+        shadow =
+            Html.style "box-shadow" "gray 0 1px 3px"
+
+        styleBase =
+            [ Html.style "position" "relative"
+            , Html.style "height" "9rem"
+            , Html.style "width" "4rem"
+            , Html.style "margin" "0.5rem"
+            ]
+
+        styleFactor =
+            [ Html.style "position" "absolute"
+            , Html.style "bottom" "0"
+            , Html.style "left" "0"
+            , Html.style "right" "0"
+            , Html.style "font-weight" "bold"
+            , Html.style "font-family" "monospace"
+            , Html.style "font-size" "5vh"
+            ]
+    in
+    if List.member factor guesses then
+        Html.div
+            styleBase
+            (if outcome == factor then
+                [ Html.div
+                    (shadow :: styleFactor)
+                    [ Html.text <| String.fromInt factor ]
+                ]
+
+             else if correctAnswer factor outcome then
+                -- this needs to go into the generator instead,
+                -- because here it will not be taken into account
+                -- with the budget
+                [ Droid.drawing
+                , Html.div
+                    styleFactor
+                    [ Html.text <| String.fromInt factor
+                    , Html.span [ Html.style "font-size" "3vh" ]
+                        [ Html.text <| "x" ++ String.fromInt (outcome // factor) ]
                     ]
                 ]
 
-        Finish ->
-            Html.div []
-                [ Html.p []
-                    [ Html.text "Hoera, alle sommen goed!" ]
+             else
+                [ Clone.drawing
+                , Html.div
+                    styleFactor
+                    [ Html.text <| String.fromInt factor ]
                 ]
+            )
 
-        Prompt input _ { exercise, answers } ->
-            Html.div []
-                [ Html.p []
-                    [ Html.text <|
-                        "Uit welke tafel(s) komt "
-                            ++ String.fromInt exercise.outcome
-                            ++ "?"
-                    ]
-                , Html.p
-                    [ Html.style "display" "flex"
-                    , Html.style "flex-direction" "row"
-                    , Html.style "flex-wrap" "wrap"
-                    , Html.style "justify-content" "space-evenly"
-                    ]
-                  <|
-                    viewFactors answers model.factors
-                ]
-
-        Reveal ({ exercise, answers } as attempt) ->
-            Html.div []
-                [ Html.p [] [ Html.text <| "Uit welke tafel(s) komt " ++ String.fromInt exercise.outcome ++ "?" ]
-                , Html.p
-                    [ Html.style "display" "flex"
-                    , Html.style "flex-direction" "row"
-                    , Html.style "flex-wrap" "wrap"
-                    , Html.style "justify-content" "space-evenly"
-                    ]
-                  <|
-                    viewAnswers attempt model.factors
-                , Html.p []
-                    [ Html.button [ Html.onClick Next ] [ Html.text "Volgende!" ]
-                    ]
-                ]
-
-
-viewFactors guesses factors =
-    List.map (viewFactor (List.map .factor guesses)) factors
-
-
-viewFactor guesses factor =
-    Html.div
-        [ Html.style "box-shadow" "gray 0 2px 3px"
-        , Html.style "font-weight" "bold"
-        , Html.style "font-family" "monospace"
-        , Html.style "font-size" "5vh"
-        , Html.style "width" "2rem"
-        , Html.style "margin" "0.5rem"
-        , Html.style "padding" "1rem"
-        , Html.onClick (Selected factor)
-        ]
-        [ Html.text <|
-            if List.member factor guesses then
-                ""
-
-            else
-                String.fromInt factor
-        ]
+    else
+        Html.div
+            (Html.onClick (Selected factor)
+                :: shadow
+                :: styleBase
+            )
+            [ Html.div
+                (Html.style "top" "30%" :: styleFactor)
+                [ Html.text <| String.fromInt factor ]
+            ]
 
 
 viewAnswers { exercise, answers } factors =
@@ -308,6 +397,7 @@ viewAnswer outcome guesses factors factor =
     let
         styleBase =
             [ Html.style "position" "relative"
+            , Html.style "height" "9rem"
             , Html.style "width" "4rem"
             , Html.style "margin" "0.5rem"
             ]
@@ -336,7 +426,7 @@ viewAnswer outcome guesses factors factor =
                 [ Html.text <| String.fromInt factor ]
             ]
 
-    else if remainderBy factor outcome == 0 then
+    else if correctAnswer factor outcome then
         -- this needs to go into the generator instead,
         -- because here it will not be taken into account
         -- with the budget
@@ -344,7 +434,10 @@ viewAnswer outcome guesses factors factor =
             [ Droid.drawing
             , Html.div
                 styleFactor
-                [ Html.text <| String.fromInt factor ]
+                [ Html.text <| String.fromInt factor
+                , Html.span [ Html.style "font-size" "3vh" ]
+                    [ Html.text <| "x" ++ String.fromInt (outcome // factor) ]
+                ]
             ]
 
     else
