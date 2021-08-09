@@ -246,7 +246,7 @@ viewSounds =
                             ( "clone-shot-", 5 )
 
                         False ->
-                            ( "aargh-", 3 )
+                            ( "aargh-", 6 )
             in
             Html.audio [ Html.autoplay True, Html.src <| prefix ++ String.fromInt (modBy max i + 1) ++ ".mp3" ] []
         )
