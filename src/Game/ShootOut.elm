@@ -148,7 +148,7 @@ update msg model =
                                 Answer exercise ({ factor = i, time = model.time - start } :: answers)
 
                             sounds =
-                                ( model.time, correctAnswer i exercise.outcome ) :: model.sounds
+                                [ ( model.time, correctAnswer i exercise.outcome ) ]
                         in
                         ( { model | sounds = sounds, state = Prompt start budget attempt }, Cmd.none )
 
@@ -237,8 +237,8 @@ advance model =
 
 
 viewSounds =
-    List.indexedMap
-        (\i ( t, correct ) ->
+    List.map
+        (\( t, correct ) ->
             let
                 ( prefix, max ) =
                     case correct of
@@ -248,7 +248,7 @@ viewSounds =
                         False ->
                             ( "aargh-", 6 )
             in
-            Html.audio [ Html.autoplay True, Html.src <| prefix ++ String.fromInt (modBy max i + 1) ++ ".mp3" ] []
+            Html.audio [ Html.autoplay True, Html.src <| prefix ++ String.fromInt (modBy max t + 1) ++ ".mp3" ] []
         )
 
 

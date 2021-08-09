@@ -7165,12 +7165,12 @@ var $author$project$Game$ShootOut$update = F2(
 					var exercise = _v2.c.exercise;
 					var answers = _v2.c.answers;
 					if (_Utils_cmp(model.time - start, budget) < 0) {
-						var sounds = A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(
+						var sounds = _List_fromArray(
+							[
+								_Utils_Tuple2(
 								model.time,
-								A2($author$project$Game$ShootOut$correctAnswer, i, exercise.outcome)),
-							model.sounds);
+								A2($author$project$Game$ShootOut$correctAnswer, i, exercise.outcome))
+							]);
 						var attempt = A2(
 							$author$project$Game$ShootOut$Answer,
 							exercise,
@@ -8128,31 +8128,30 @@ var $author$project$Game$ShootOut$viewFactors = F2(
 var $elm$html$Html$audio = _VirtualDom_node('audio');
 var $elm$html$Html$Attributes$autoplay = $elm$html$Html$Attributes$boolProperty('autoplay');
 var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Game$ShootOut$viewSounds = $elm$core$List$indexedMap(
-	F2(
-		function (i, _v0) {
-			var t = _v0.a;
-			var correct = _v0.b;
-			var _v1 = function () {
-				if (correct) {
-					return _Utils_Tuple2('clone-shot-', 5);
-				} else {
-					return _Utils_Tuple2('aargh-', 3);
-				}
-			}();
-			var prefix = _v1.a;
-			var max = _v1.b;
-			return A2(
-				$elm$html$Html$audio,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$autoplay(true),
-						$elm$html$Html$Attributes$src(
-						prefix + ($elm$core$String$fromInt(
-							A2($elm$core$Basics$modBy, max, i) + 1) + '.mp3'))
-					]),
-				_List_Nil);
-		}));
+var $author$project$Game$ShootOut$viewSounds = $elm$core$List$map(
+	function (_v0) {
+		var t = _v0.a;
+		var correct = _v0.b;
+		var _v1 = function () {
+			if (correct) {
+				return _Utils_Tuple2('clone-shot-', 5);
+			} else {
+				return _Utils_Tuple2('aargh-', 6);
+			}
+		}();
+		var prefix = _v1.a;
+		var max = _v1.b;
+		return A2(
+			$elm$html$Html$audio,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$autoplay(true),
+					$elm$html$Html$Attributes$src(
+					prefix + ($elm$core$String$fromInt(
+						A2($elm$core$Basics$modBy, max, t) + 1) + '.mp3'))
+				]),
+			_List_Nil);
+	});
 var $author$project$Game$ShootOut$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
